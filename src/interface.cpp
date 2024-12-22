@@ -90,7 +90,7 @@ Sensors<BKND::sensors::type::Analog>::Sensors(int p_port) : m_Port(p_port) {
 }
 float Sensors<BKND::sensors::type::Analog>::Value() const {
   DBUG;
-  return BKND::sensors::nlg::Value(m_Port);
+  return BKND::sensors::analog::Value(m_Port);
 }
 
 Sensors<BKND::sensors::type::Digital>::Sensors(int p_port) : m_Port(p_port) {
@@ -98,7 +98,7 @@ Sensors<BKND::sensors::type::Digital>::Sensors(int p_port) : m_Port(p_port) {
 }
 bool Sensors<BKND::sensors::type::Digital>::Value() const {
   DBUG;
-  return BKND::sensors::dgtl::Value(m_Port);
+  return BKND::sensors::digital::Value(m_Port);
 }
 
 PathFind::PathFind(BKND::pass &motorstoread) : m_Read(motorstoread) { DBUG; }

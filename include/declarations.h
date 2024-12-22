@@ -111,7 +111,7 @@ bool MarginOfError(A p_inputa, B p_inputb, C p_range) {
 string PrettyTime(int); /*display milliseconds as min:sec.ms*/
 
 namespace misc {
-void waitforlight(int);
+void WaitForLight(int);
 void Timer();    // start a clock that updates a global variable. does not end
 void HandsOff(); // starts handsoff/shutdownin
 void Start(bool, int, bool, int, int, float, float,
@@ -165,13 +165,13 @@ void GoTo(BKND::P2D, float,
 namespace sensors {
 enum type { Analog, Digital };
 
-namespace dgtl {
+namespace digital {
 bool Value(int); // get the value of a port
-}; // namespace dgtl
-namespace nlg {
+}; // namespace digital
+namespace analog {
 float Value(int); // get the value of a port as a percent of the max
 int Raw(int);     // get the raw value of a port
-}; // namespace nlg
+}; // namespace analog
 namespace accel {
 void Calibrate();  // calibrates the accelerometer
 float Magnitude(); // gets the magnitude of the vector the accelerometer is
@@ -195,10 +195,10 @@ float Pitch();
 float Yaw();
 void Update();
 }; // namespace mag
-namespace bttry {
+namespace battery {
 int Power();     // get the power level from 0-100
 bool Critical(); // is the battery less than 33% full?
-}; // namespace bttry
+}; // namespace battery
 }; // namespace sensors
 
 namespace servos {
@@ -225,17 +225,14 @@ void Brake(pass p_vals);                             // turn on the brakes
 float Interpolate(float p_timepercent);
 class Thread {
 public:
-  thread m_Thethread;
+  thread m_Thread;
   Thread(void (*p_func)());
   void Run() const;  // start the thread
   void Kill() const; // end the thread
 }; // namespace newThread
 
-string getLogfile();
-
 extern long int G_CurrentMS;
 extern std::ofstream G_file;
-extern std::vector<worldSpace *> G_Obstacles;
 extern worldSpace G_Position;
 
 extern BKND::pointpair TTD;

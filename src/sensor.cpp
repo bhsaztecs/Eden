@@ -1,14 +1,15 @@
 #include "../include/declarations.h"
+#include <kipr/analog/analog.h>
 
 namespace BKND {
 namespace sensors {
-namespace dgtl {
-bool Value(int p_port) { return digital(p_port) != 0; }
-} // namespace dgtl
-namespace nlg {
-float Value(int p_port) { return (float)analog(p_port) / 4095.0; }
-int Raw(int p_port) { return analog(p_port); }
-} // namespace nlg
+namespace digital {
+bool Value(int p_port) { return ::digital(p_port) != 0; }
+} // namespace digital
+namespace analog {
+float Value(int p_port) { return (float)::analog(p_port) / 4095.0; }
+int Raw(int p_port) { return ::analog(p_port); }
+} // namespace analog
 namespace accel {
 BKND::P3D Value;
 void Calibrate() {
@@ -77,9 +78,9 @@ void Update() {
   Value.m_Z = magneto_z();
 }
 } // namespace mag
-namespace bttry {
+namespace battery {
 int Power() { return power_level() * 100; }
 bool Critical() { return Power() < 33; }
-} // namespace bttry
+} // namespace battery
 } // namespace sensors
 } // namespace BKND

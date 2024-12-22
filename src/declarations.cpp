@@ -13,11 +13,10 @@ BKND::pointpair PTTPS(BKND::P2D(0, 0), BKND::P2D(1, 15));
 BKND::pointpair TPSTP(BKND::P2D(0, 0), BKND::P2D(15, 1));
 
 long int G_CurrentMS = 0;
-std::ofstream G_file(getLogfile());
+std::ofstream G_file("data/log.txt");
 std::vector<worldSpace *> G_Obstacles;
 worldSpace G_Position(0, 0, 0, 0);
 
-string getLogfile() { return "data/log.txt"; }
 string PrettyTime(int p_ms) {
   int min;
   int sec;
@@ -186,14 +185,14 @@ float Interpolate(float p_timepercent) {
 Thread::Thread(
     void (*p_func)()) { // create a new thread with a function as a parameter
   DBUG;
-  m_Thethread = thread_create(p_func);
+  m_Thread = thread_create(p_func);
 }
 void Thread::Run() const { // start the thread
   DBUG;
-  thread_start(m_Thethread);
+  thread_start(m_Thread);
 }
 void Thread::Kill() const { // end the thread
   DBUG;
-  thread_destroy(m_Thethread);
+  thread_destroy(m_Thread);
 }
 } // namespace BKND
