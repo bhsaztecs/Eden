@@ -148,29 +148,30 @@ bool Z();
 }; // namespace misc
 
 namespace pathFind {
-void AthenaDecision(float, float,
-                    pass); /*Decide which algorithm to use, then uses it.*/
+void Pathfind(float, float,
+              pass); /*Decide which algorithm to use, then uses it.*/
 /* IN {-> Change in Left wheel position, Change in Right wheel position
  */
 void AngularPathfind(float, float,
                      pass);              /*Updates orientation based on inputs*/
 void LinearPathfind(float, float, pass); /*Updates position based on inputs*/
-void DynamicPathfind(float, float); /*Updates position and orientation based on
-         inputs. MAY DIVIDE BY 0*/
+void DynamicPathfind(float, float); /*Updates position and orientation based
+         on inputs. MAY DIVIDE BY 0*/
 void Face(float, float, pass); // face a certain degree heading in given time
-void GoTo(BKND::P2D, float, pass); // go to an (x,y) coordinate in a given time
-};                                 // namespace pathFind
+void GoTo(BKND::P2D, float,
+          pass); // go to an (x,y) coordinate in a given time
+}; // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
 
 namespace dgtl {
 bool Value(int); // get the value of a port
-};               // namespace dgtl
+}; // namespace dgtl
 namespace nlg {
 float Value(int); // get the value of a port as a percent of the max
 int Raw(int);     // get the raw value of a port
-};                // namespace nlg
+}; // namespace nlg
 namespace accel {
 void Calibrate();  // calibrates the accelerometer
 float Magnitude(); // gets the magnitude of the vector the accelerometer is
@@ -179,7 +180,7 @@ float Pitch();     // gets the pitch of the vector
 float Yaw();       // gets the yaw of the vector
 void Update();     // update the vector's values. (automatically called on
                    // mag,pitch,yaw)
-};                 // namespace accel
+}; // namespace accel
 namespace gyro {
 void Calibrate();
 float Magnitude();
@@ -197,8 +198,8 @@ void Update();
 namespace bttry {
 int Power();     // get the power level from 0-100
 bool Critical(); // is the battery less than 33% full?
-};               // namespace bttry
-};               // namespace sensors
+}; // namespace bttry
+}; // namespace sensors
 
 namespace servos {
 void Set(int, float, pointpair);
@@ -219,7 +220,7 @@ void Rotation(float p_leftdegrees, float p_rightdegrees, float p_timeinseconds,
 void Accelerate(float p_leftmaxpercent, float p_rightmaxpercent,
                 float p_timeinseconds, pass p_vals); // interpolate to a speed
 void Brake(pass p_vals);                             // turn on the brakes
-};                                                   // namespace motors
+}; // namespace motors
 
 float Interpolate(float p_timepercent);
 class Thread {
@@ -228,7 +229,7 @@ public:
   Thread(void (*p_func)());
   void Run() const;  // start the thread
   void Kill() const; // end the thread
-};                   // namespace newThread
+}; // namespace newThread
 
 string getLogfile();
 
@@ -246,30 +247,42 @@ extern BKND::pointpair ITT;
 extern BKND::pointpair TPSTP;
 extern BKND::pointpair PTTPS;
 
-template <typename T>
-void logVariable(const std::string &name, const T &value) {
-  BKND::G_file << name << "=" << value << "; ";
+template <typename T> void logVariable(const std::string &p_name, T p_val) {
+  BKND::G_file << p_name << "=" << p_val << "; ";
 }
 
-template <typename T>
-void logVariables(const std::string &names, const T &value) {
-  std::istringstream iss(names);
-  std::string varName;
-  std::getline(iss, varName, ',');
-  logVariable(varName, value);
-  BKND::G_file << std::endl;
+// Base case for variadic template recursion
+inline void logVariables() {
+  BKND::G_file << std::endl; // End the line
 }
 
-template <typename T, typename... Ts>
-void logVariables(const std::string &names, const T &value, const Ts &...rest) {
-  std::istringstream iss(names);
-  std::string varName;
-  std::getline(iss, varName, ',');
-  logVariable(varName, value);
+// Recursive case for multiple variables
+template <typename T, typename... Args>
+void logVariables(const std::string &p_names, T first, Args... rest) {
+  // Find the first comma in the parameter names string
+  size_t comma_pos = p_names.find(',');
 
-  std::string remaining;
-  std::getline(iss, remaining);
-  logVariables(remaining, rest...);
+  // Extract the first variable name
+  std::string first_name;
+  if (comma_pos != std::string::npos) {
+    first_name = p_names.substr(0, comma_pos);
+  } else {
+    first_name = p_names;
+  }
+
+  // Remove leading/trailing whitespace from the name
+  first_name.erase(0, first_name.find_first_not_of(" \t"));
+  first_name.erase(first_name.find_last_not_of(" \t") + 1);
+
+  // Log the first variable
+  logVariable(first_name, first);
+
+  // Recursive call for remaining variables
+  if (comma_pos != std::string::npos) {
+    logVariables(p_names.substr(comma_pos + 1), rest...);
+  } else {
+    logVariables();
+  }
 }
 
 #define LOG_VARS(...) logVariables(#__VA_ARGS__, __VA_ARGS__)

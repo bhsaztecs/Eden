@@ -134,9 +134,7 @@ worldSpace::worldSpace(float p_x, float p_y, float p_r, float p_orientation) {
   this->m_X = p_x;
   this->m_Y = p_y;
   this->m_Radius = p_r;
-  G_Obstacles.push_back(this);
 }
-
 bool worldSpace::operator==(const worldSpace &p_other) {
   return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y) &&
          (this->m_Orientation == p_other.m_Orientation);

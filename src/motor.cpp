@@ -33,7 +33,7 @@ void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
   float rightposition2 = BKND::lerp(TTI, gmpc(p_vals.rightmotor));
   float leftdelta = leftposition2 - leftposition1;
   float rightdelta = rightposition2 - rightposition1;
-  BKND::pathFind::AthenaDecision(leftdelta, rightdelta, p_vals);
+  BKND::pathFind::Pathfind(leftdelta, rightdelta, p_vals);
 }
 void Distance(float p_leftinches, float p_rightinches, float p_timeinseconds,
               pass p_vals) {

@@ -1,7 +1,7 @@
 #include "../include/declarations.h"
 namespace BKND {
 namespace pathFind {
-void AthenaDecision(float p_deltal, float p_deltar, pass p_vals) {
+void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
   if (BKND::MarginOfError(p_deltal, p_deltar, p_vals.margin)) {
     BKND::pathFind::LinearPathfind(p_deltal, p_deltar, p_vals);
     return;
@@ -24,8 +24,7 @@ void LinearPathfind(float p_deltal, float p_deltar, pass p_vals) {
   BKND::P2D delta(distance * cos(BKND::Rad(BKND::G_Position.m_Orientation)),
                   distance * sin(BKND::Rad(BKND::G_Position.m_Orientation)));
 
-  BKND::G_Position.m_X += delta.m_X;
-  BKND::G_Position.m_Y += delta.m_Y;
+  BKND::G_Position += delta;
 }
 
 void DynamicPathfind(float p_deltal, float p_deltar) {
@@ -46,16 +45,18 @@ void Face(float p_deg, float p_time, pass p_vals) {
 }
 void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
   DBUG;
-  BKND::P2D delta = (p_goal - BKND::G_Position);
-  float ftime = (delta.Angle() / delta.Angle() + delta.Magnitude()) * p_time;
+  worldSpace delta = (worldSpace(p_goal.m_X, p_goal.m_Y) - BKND::G_Position);
+  float bias = 10;
+  float ftime = (fabs(delta.Angle() / bias) /
+                 (fabs(delta.Angle() / bias) + delta.Magnitude())) *
+                p_time;
   float dtime =
-      (delta.Magnitude() / delta.Angle() + delta.Magnitude()) * p_time;
-
-  Face(delta.Angle(), p_time / 2, p_vals);
+      (delta.Magnitude() / (fabs(delta.Angle() / bias) + delta.Magnitude())) *
+      p_time;
+  Face(delta.Angle(), ftime, p_vals);
   BKND::motors::Brake(p_vals);
-  msleep(10);
-  BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), p_time / 2,
-                         p_vals);
+  msleep(100);
+  BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), dtime, p_vals);
 }
 } // namespace pathFind
 } // namespace BKND
