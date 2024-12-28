@@ -8,9 +8,8 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 using std::string;
-using std::vector;
+
 namespace BKND {
 
 class Thread; // thread functionality
@@ -33,7 +32,6 @@ public:
   void operator-=(const P2D &p_other);
 };
 class P3D {
-
 public:
   float m_X;
   float m_Y;
@@ -87,6 +85,7 @@ struct pass {
         rightspeed(p_rightspeed) {}
 };
 float Deg(float); /*Convert Radians to Degrees*/
+float NormalizeAngle(float p_angle);
 float Rad(float); /*Convert Degrees to Radians*/
 float lerp(pointpair,
            float); /*get a linear transition from (x1,y1) to (x2,y2) at x */

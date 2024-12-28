@@ -1,16 +1,17 @@
 #include "../include/declarations.h"
 namespace BKND {
 
-BKND::pointpair TTD(BKND::P2D(0, 0), BKND::P2D(1, 5.55));
-BKND::pointpair DTT(BKND::P2D(0, 0), BKND::P2D(5.55, 1));
+BKND::pointpair TTD(BKND::P2D(0, 0), BKND::P2D(1900, 180));
+BKND::pointpair DTT(BKND::P2D(0, 0), BKND::P2D(180, 1900));
 
-BKND::pointpair ITD(BKND::P2D(0, 0), BKND::P2D(1, Deg(1.5) / 2));
-BKND::pointpair DTI(BKND::P2D(0, 0), BKND::P2D(Deg(1.5) / 2, 1));
-BKND::pointpair TTI(BKND::P2D(0, 0), BKND::P2D(230 / 1.0613, 1));
-BKND::pointpair ITT(BKND::P2D(0, 0), BKND::P2D(1, 230));
+BKND::pointpair ITD(BKND::P2D(0, 0), BKND::P2D(1, 41.379));
+BKND::pointpair DTI(BKND::P2D(0, 0), BKND::P2D(41.379, 1));
 
-BKND::pointpair PTTPS(BKND::P2D(0, 0), BKND::P2D(1, 15));
-BKND::pointpair TPSTP(BKND::P2D(0, 0), BKND::P2D(15, 1));
+BKND::pointpair TTI(BKND::P2D(0, 0), BKND::P2D(436.782, 1));
+BKND::pointpair ITT(BKND::P2D(0, 0), BKND::P2D(1, 436.782));
+
+BKND::pointpair PTTPS(BKND::P2D(0, 0), BKND::P2D(100, 1386));
+BKND::pointpair TPSTP(BKND::P2D(0, 0), BKND::P2D(1386, 100));
 
 long int G_CurrentMS = 0;
 std::ofstream G_file("data/log.txt");
@@ -46,7 +47,6 @@ float mm(float p_inches) { return p_inches * 25.4; }
 float inch(float p_mm) { return p_mm / 25.4; }
 
 float lerp(pointpair p_slope, float p_x) {
-  /* ( (del y over del x) * x ) + p0.y */
   float dely = p_slope.second.m_Y - p_slope.first.m_Y;
   float delx = p_slope.second.m_X - p_slope.first.m_X;
   float m = dely / delx;
@@ -60,6 +60,15 @@ P2D::P2D(float p_x, float p_y) {
 }
 float P2D::Magnitude() const {
   return std::sqrt(std::pow(m_X, 2) + std::pow(m_Y, 2));
+}
+float NormalizeAngle(float p_angle) {
+  float angle = fmod(p_angle, 360.0);
+  if (angle < -180) {
+    angle += 360.0;
+  } else if (angle >= 180) {
+    angle -= 360;
+  }
+  return angle;
 }
 float P2D::Angle() const { return Deg(std::atan2(m_Y, m_X)); }
 P2D P2D::operator-(const P2D &p_other) const {
@@ -129,7 +138,7 @@ void P3D::operator-=(const P3D &p_other) {
 }
 
 worldSpace::worldSpace(float p_x, float p_y, float p_r, float p_orientation) {
-  this->m_Orientation = p_orientation;
+  this->m_Orientation = NormalizeAngle(p_orientation);
   this->m_X = p_x;
   this->m_Y = p_y;
   this->m_Radius = p_r;
@@ -143,11 +152,11 @@ bool worldSpace::operator!=(const worldSpace &p_other) {
 }
 worldSpace worldSpace::operator-(const P2D &p_other) {
   return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-                    this->m_Orientation);
+                    NormalizeAngle(this->m_Orientation));
 }
 worldSpace worldSpace::operator+(const P2D &p_other) {
   return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-                    this->m_Orientation);
+                    NormalizeAngle(this->m_Orientation));
 }
 void worldSpace::operator+=(const P2D &p_other) {
   P2D temp(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
@@ -160,12 +169,14 @@ void worldSpace::operator-=(const P2D &p_other) {
   this->m_Y = temp.m_Y;
 }
 worldSpace worldSpace::operator-(const worldSpace &p_other) {
-  return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-                    this->m_Orientation - p_other.m_Orientation);
+  return worldSpace(
+      this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
+      NormalizeAngle(this->m_Orientation - p_other.m_Orientation));
 }
 worldSpace worldSpace::operator+(const worldSpace &p_other) {
-  return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-                    this->m_Orientation + p_other.m_Orientation);
+  return worldSpace(
+      this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
+      NormalizeAngle(this->m_Orientation + p_other.m_Orientation));
 }
 void worldSpace::operator+=(const worldSpace &p_other) {
   *this = (*this + p_other);

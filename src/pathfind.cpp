@@ -14,9 +14,10 @@ void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
 }
 void AngularPathfind(float p_deltal, float p_deltar, pass p_vals) {
   float wheelangle = (fabs(p_deltal) + fabs(p_deltar)) / 2;
-  float orientationoffset = wheelangle / (p_vals.turnrate * 1.32); // WHYYYYYYY
+  float orientationoffset = wheelangle / (p_vals.turnrate / 1.35); // WHYYYYYYY
 
-  BKND::G_Position.m_Orientation += BKND::Deg(orientationoffset);
+  BKND::G_Position.m_Orientation = NormalizeAngle(
+      BKND::G_Position.m_Orientation + BKND::Deg(orientationoffset));
 }
 
 void LinearPathfind(float p_deltal, float p_deltar, pass p_vals) {
@@ -35,7 +36,8 @@ void DynamicPathfind(float p_deltal, float p_deltar) {
                              fabs(curvature) * sin(theta));
 
   BKND::G_Position += changeinposition;
-  BKND::G_Position.m_Orientation += BKND::Deg(theta);
+  BKND::G_Position.m_Orientation =
+      NormalizeAngle(BKND::G_Position.m_Orientation + BKND::Deg(theta));
 }
 void Face(float p_deg, float p_time, pass p_vals) {
   DBUG;
