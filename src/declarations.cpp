@@ -137,8 +137,8 @@ void P3D::operator-=(const P3D &p_other) {
   this->m_Z = temp.m_Z;
 }
 
-worldSpace::worldSpace(float p_x, float p_y, float p_r, float p_orientation) {
-  this->m_Orientation = NormalizeAngle(p_orientation);
+worldSpace::worldSpace(float p_x, float p_y, float p_o, float p_r) {
+  this->m_Orientation = p_o;
   this->m_X = p_x;
   this->m_Y = p_y;
   this->m_Radius = p_r;
@@ -152,11 +152,11 @@ bool worldSpace::operator!=(const worldSpace &p_other) {
 }
 worldSpace worldSpace::operator-(const P2D &p_other) {
   return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-                    NormalizeAngle(this->m_Orientation));
+                    (this->m_Orientation));
 }
 worldSpace worldSpace::operator+(const P2D &p_other) {
   return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-                    NormalizeAngle(this->m_Orientation));
+                    (this->m_Orientation));
 }
 void worldSpace::operator+=(const P2D &p_other) {
   P2D temp(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
@@ -169,14 +169,12 @@ void worldSpace::operator-=(const P2D &p_other) {
   this->m_Y = temp.m_Y;
 }
 worldSpace worldSpace::operator-(const worldSpace &p_other) {
-  return worldSpace(
-      this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-      NormalizeAngle(this->m_Orientation - p_other.m_Orientation));
+  return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
+                    (this->m_Orientation - p_other.m_Orientation));
 }
 worldSpace worldSpace::operator+(const worldSpace &p_other) {
-  return worldSpace(
-      this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-      NormalizeAngle(this->m_Orientation + p_other.m_Orientation));
+  return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
+                    this->m_Orientation + p_other.m_Orientation);
 }
 void worldSpace::operator+=(const worldSpace &p_other) {
   *this = (*this + p_other);

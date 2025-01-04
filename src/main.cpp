@@ -1,6 +1,6 @@
 #include "../include/interface.h"
 using namespace BKND;
-Motors tank(3, 0, .97, 1, 2.5, 2.4545);
+Motors tank(3, 0, .97, 1, 3.5 / 2, 6.75 / 2);
 Servos arm(0, P2D(315, 0), P2D(1365, 90));
 Servos claw(1, P2D(0, 0), P2D(1000, 90));
 Sensors<sensors::type::Analog> startlight(1);
@@ -19,6 +19,10 @@ int main() {
   Thread TIMER([]() { misc::Timer(); });
   TIMER.Run();
   VELOCITY.Run();
+  printnav();
+  nav.Face(45, 2);
+  printnav();
+  nav.Face(0, 2);
   nav.GoTo(P2D(30, 30), 5);
   printnav();
   nav.GoTo(P2D(0, 0), 5);

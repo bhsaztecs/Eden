@@ -72,17 +72,17 @@ struct pass {
   float lmm; // left motor multiplier
   float rmm;
   float tmm;
-  float margin;
-  float turnrate;
+  float wheelradius;
+  float wheelbase;
   float &leftspeed;
   float &rightspeed;
   pass(int p_leftmotorport, int p_rightmotorport, float p_leftmultiplier,
-       float p_rightmultiplier, float p_timemultiplier, float p_athenamargin,
-       float p_turnrate, float &p_leftspeed, float &p_rightspeed)
+       float p_rightmultiplier, float p_timemultiplier, float p_wheelradius,
+       float p_wheelbase, float &p_leftspeed, float &p_rightspeed)
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier), tmm(p_timemultiplier),
-        margin(p_athenamargin), turnrate(p_turnrate), leftspeed(p_leftspeed),
-        rightspeed(p_rightspeed) {}
+        wheelradius(p_wheelradius), wheelbase(p_wheelbase),
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {}
 };
 float Deg(float); /*Convert Radians to Degrees*/
 float NormalizeAngle(float p_angle);
