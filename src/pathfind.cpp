@@ -1,12 +1,13 @@
 #include "../include/declarations.h"
 namespace BKND {
 namespace pathFind {
-
 void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
+  DBUG;
   float theta = (p_deltar - p_deltal) / (2 * p_vals.wheelbase);
   float distance = (p_deltar + p_deltal) / 2;
-  auto temp = BKND::worldSpace(distance * cos(theta), distance * sin(theta),
-                               Deg(theta));
+  BKND::worldSpace temp = BKND::worldSpace(
+      distance * cos(theta + Rad(G_Position.m_Orientation)),
+      distance * sin(theta + Rad(G_Position.m_Orientation)), Deg(theta));
   G_Position.m_X += temp.m_X;
   G_Position.m_Y += temp.m_Y;
   G_Position.m_Orientation += temp.m_Orientation;
@@ -28,7 +29,7 @@ void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
       (delta.Magnitude() / (fabs(delta.Angle() / bias) + delta.Magnitude())) *
       p_time;
 
-  Face(fmod(delta.Angle() + 360, 360), ftime, p_vals);
+  BKND::pathFind::Face(delta.Angle(), ftime, p_vals);
   BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), dtime, p_vals);
 }
 } // namespace pathFind

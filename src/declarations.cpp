@@ -1,14 +1,14 @@
 #include "../include/declarations.h"
 namespace BKND {
 
-BKND::pointpair TTD(BKND::P2D(0, 0), BKND::P2D(1900, 180));
-BKND::pointpair DTT(BKND::P2D(0, 0), BKND::P2D(180, 1900));
+BKND::pointpair TTD(BKND::P2D(0, 0), BKND::P2D(1900, 360));
+BKND::pointpair DTT(BKND::P2D(0, 0), BKND::P2D(360, 1900));
 
 BKND::pointpair ITD(BKND::P2D(0, 0), BKND::P2D(1, 41.379));
 BKND::pointpair DTI(BKND::P2D(0, 0), BKND::P2D(41.379, 1));
 
-BKND::pointpair TTI(BKND::P2D(0, 0), BKND::P2D(436.782, 1));
-BKND::pointpair ITT(BKND::P2D(0, 0), BKND::P2D(1, 436.782));
+BKND::pointpair TTI(BKND::P2D(0, 0), BKND::P2D(436.782, 2));
+BKND::pointpair ITT(BKND::P2D(0, 0), BKND::P2D(1.57, 436.782));
 
 BKND::pointpair PTTPS(BKND::P2D(0, 0), BKND::P2D(100, 1386));
 BKND::pointpair TPSTP(BKND::P2D(0, 0), BKND::P2D(1386, 100));

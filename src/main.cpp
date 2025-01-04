@@ -20,10 +20,7 @@ int main() {
   TIMER.Run();
   VELOCITY.Run();
   printnav();
-  nav.Face(45, 2);
-  printnav();
-  nav.Face(0, 2);
-  nav.GoTo(P2D(30, 30), 5);
+  nav.GoTo(P2D(6, 0), 5);
   printnav();
   nav.GoTo(P2D(0, 0), 5);
   printnav();

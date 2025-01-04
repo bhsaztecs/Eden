@@ -247,18 +247,11 @@ template <typename T> void logVariable(const std::string &p_name, T p_val) {
   BKND::G_file << p_name << "=" << p_val << "; ";
 }
 
-// Base case for variadic template recursion
-inline void logVariables() {
-  BKND::G_file << std::endl; // End the line
-}
+inline void logVariables() { BKND::G_file << std::endl; }
 
-// Recursive case for multiple variables
 template <typename T, typename... Args>
 void logVariables(const std::string &p_names, T first, Args... rest) {
-  // Find the first comma in the parameter names string
   size_t comma_pos = p_names.find(',');
-
-  // Extract the first variable name
   std::string first_name;
   if (comma_pos != std::string::npos) {
     first_name = p_names.substr(0, comma_pos);
@@ -266,14 +259,10 @@ void logVariables(const std::string &p_names, T first, Args... rest) {
     first_name = p_names;
   }
 
-  // Remove leading/trailing whitespace from the name
   first_name.erase(0, first_name.find_first_not_of(" \t"));
   first_name.erase(first_name.find_last_not_of(" \t") + 1);
 
-  // Log the first variable
   logVariable(first_name, first);
-
-  // Recursive call for remaining variables
   if (comma_pos != std::string::npos) {
     logVariables(p_names.substr(comma_pos + 1), rest...);
   } else {
@@ -284,5 +273,5 @@ void logVariables(const std::string &p_names, T first, Args... rest) {
 #define LOG_VARS(...) logVariables(#__VA_ARGS__, __VA_ARGS__)
 #define DBUG                                                                   \
   BKND::G_file << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
-               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl;
+               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND
