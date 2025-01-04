@@ -8,9 +8,8 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 using std::string;
-using std::vector;
+
 namespace BKND {
 
 class Thread; // thread functionality
@@ -33,7 +32,6 @@ public:
   void operator-=(const P2D &p_other);
 };
 class P3D {
-
 public:
   float m_X;
   float m_Y;
@@ -74,19 +72,20 @@ struct pass {
   float lmm; // left motor multiplier
   float rmm;
   float tmm;
-  float margin;
-  float turnrate;
+  float wheelradius;
+  float wheelbase;
   float &leftspeed;
   float &rightspeed;
   pass(int p_leftmotorport, int p_rightmotorport, float p_leftmultiplier,
-       float p_rightmultiplier, float p_timemultiplier, float p_athenamargin,
-       float p_turnrate, float &p_leftspeed, float &p_rightspeed)
+       float p_rightmultiplier, float p_timemultiplier, float p_wheelradius,
+       float p_wheelbase, float &p_leftspeed, float &p_rightspeed)
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier), tmm(p_timemultiplier),
-        margin(p_athenamargin), turnrate(p_turnrate), leftspeed(p_leftspeed),
-        rightspeed(p_rightspeed) {}
+        wheelradius(p_wheelradius), wheelbase(p_wheelbase),
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {}
 };
 float Deg(float); /*Convert Radians to Degrees*/
+float NormalizeAngle(float p_angle);
 float Rad(float); /*Convert Degrees to Radians*/
 float lerp(pointpair,
            float); /*get a linear transition from (x1,y1) to (x2,y2) at x */
@@ -111,7 +110,7 @@ bool MarginOfError(A p_inputa, B p_inputb, C p_range) {
 string PrettyTime(int); /*display milliseconds as min:sec.ms*/
 
 namespace misc {
-void waitforlight(int);
+void WaitForLight(int);
 void Timer();    // start a clock that updates a global variable. does not end
 void HandsOff(); // starts handsoff/shutdownin
 void Start(bool, int, bool, int, int, float, float,
@@ -148,29 +147,30 @@ bool Z();
 }; // namespace misc
 
 namespace pathFind {
-void AthenaDecision(float, float,
-                    pass); /*Decide which algorithm to use, then uses it.*/
+void Pathfind(float, float,
+              pass); /*Decide which algorithm to use, then uses it.*/
 /* IN {-> Change in Left wheel position, Change in Right wheel position
  */
 void AngularPathfind(float, float,
                      pass);              /*Updates orientation based on inputs*/
 void LinearPathfind(float, float, pass); /*Updates position based on inputs*/
-void DynamicPathfind(float, float); /*Updates position and orientation based on
-         inputs. MAY DIVIDE BY 0*/
+void DynamicPathfind(float, float); /*Updates position and orientation based
+         on inputs. MAY DIVIDE BY 0*/
 void Face(float, float, pass); // face a certain degree heading in given time
-void GoTo(BKND::P2D, float, pass); // go to an (x,y) coordinate in a given time
-};                                 // namespace pathFind
+void GoTo(BKND::P2D, float,
+          pass); // go to an (x,y) coordinate in a given time
+}; // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
 
-namespace dgtl {
+namespace digital {
 bool Value(int); // get the value of a port
-};               // namespace dgtl
-namespace nlg {
+}; // namespace digital
+namespace analog {
 float Value(int); // get the value of a port as a percent of the max
 int Raw(int);     // get the raw value of a port
-};                // namespace nlg
+}; // namespace analog
 namespace accel {
 void Calibrate();  // calibrates the accelerometer
 float Magnitude(); // gets the magnitude of the vector the accelerometer is
@@ -179,7 +179,7 @@ float Pitch();     // gets the pitch of the vector
 float Yaw();       // gets the yaw of the vector
 void Update();     // update the vector's values. (automatically called on
                    // mag,pitch,yaw)
-};                 // namespace accel
+}; // namespace accel
 namespace gyro {
 void Calibrate();
 float Magnitude();
@@ -194,11 +194,11 @@ float Pitch();
 float Yaw();
 void Update();
 }; // namespace mag
-namespace bttry {
+namespace battery {
 int Power();     // get the power level from 0-100
 bool Critical(); // is the battery less than 33% full?
-};               // namespace bttry
-};               // namespace sensors
+}; // namespace battery
+}; // namespace sensors
 
 namespace servos {
 void Set(int, float, pointpair);
@@ -219,22 +219,19 @@ void Rotation(float p_leftdegrees, float p_rightdegrees, float p_timeinseconds,
 void Accelerate(float p_leftmaxpercent, float p_rightmaxpercent,
                 float p_timeinseconds, pass p_vals); // interpolate to a speed
 void Brake(pass p_vals);                             // turn on the brakes
-};                                                   // namespace motors
+}; // namespace motors
 
 float Interpolate(float p_timepercent);
 class Thread {
 public:
-  thread m_Thethread;
+  thread m_Thread;
   Thread(void (*p_func)());
   void Run() const;  // start the thread
   void Kill() const; // end the thread
-};                   // namespace newThread
-
-string getLogfile();
+}; // namespace newThread
 
 extern long int G_CurrentMS;
 extern std::ofstream G_file;
-extern std::vector<worldSpace *> G_Obstacles;
 extern worldSpace G_Position;
 
 extern BKND::pointpair TTD;
@@ -246,34 +243,35 @@ extern BKND::pointpair ITT;
 extern BKND::pointpair TPSTP;
 extern BKND::pointpair PTTPS;
 
-template <typename T>
-void logVariable(const std::string &name, const T &value) {
-  BKND::G_file << name << "=" << value << "; ";
+template <typename T> void logVariable(const std::string &p_name, T p_val) {
+  BKND::G_file << p_name << "=" << p_val << "; ";
 }
 
-template <typename T>
-void logVariables(const std::string &names, const T &value) {
-  std::istringstream iss(names);
-  std::string varName;
-  std::getline(iss, varName, ',');
-  logVariable(varName, value);
-  BKND::G_file << std::endl;
-}
+inline void logVariables() { BKND::G_file << std::endl; }
 
-template <typename T, typename... Ts>
-void logVariables(const std::string &names, const T &value, const Ts &...rest) {
-  std::istringstream iss(names);
-  std::string varName;
-  std::getline(iss, varName, ',');
-  logVariable(varName, value);
+template <typename T, typename... Args>
+void logVariables(const std::string &p_names, T first, Args... rest) {
+  size_t comma_pos = p_names.find(',');
+  std::string first_name;
+  if (comma_pos != std::string::npos) {
+    first_name = p_names.substr(0, comma_pos);
+  } else {
+    first_name = p_names;
+  }
 
-  std::string remaining;
-  std::getline(iss, remaining);
-  logVariables(remaining, rest...);
+  first_name.erase(0, first_name.find_first_not_of(" \t"));
+  first_name.erase(first_name.find_last_not_of(" \t") + 1);
+
+  logVariable(first_name, first);
+  if (comma_pos != std::string::npos) {
+    logVariables(p_names.substr(comma_pos + 1), rest...);
+  } else {
+    logVariables();
+  }
 }
 
 #define LOG_VARS(...) logVariables(#__VA_ARGS__, __VA_ARGS__)
 #define DBUG                                                                   \
   BKND::G_file << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
-               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl;
+               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND

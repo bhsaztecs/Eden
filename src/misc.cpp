@@ -35,7 +35,7 @@ void Show(bool p_vis) {
 }
 bool Visible() { return get_extra_buttons_visible() != 0; }
 } // namespace buttons
-void waitforlight(int p_port) {
+void WaitForLight(int p_port) {
   DBUG;
   int onvalue;
   int offvalue;

@@ -1,7 +1,4 @@
 #include "../include/declarations.h"
-#include <iostream>
-#include <kipr/servo/servo.h>
-#include <kipr/time/time.h>
 namespace BKND {
 namespace servos {
 void Set(int p_port, float p_angle, pointpair p_slope) {

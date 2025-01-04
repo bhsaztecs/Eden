@@ -18,9 +18,9 @@ void Motors::NormalizeMultipliers(float p_leftmultiplier,
 }
 
 Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
-               float p_rightmultiplier, float p_athenamargin, float p_turnrate)
+               float p_rightmultiplier, float p_wheelradius, float p_wheelbase)
     : m_pass(p_leftport, p_rightport, p_leftmultiplier, p_rightmultiplier, 1.0F,
-             p_athenamargin, p_turnrate, m_LeftSpeed, m_RightSpeed) {
+             p_wheelradius, p_wheelbase, m_LeftSpeed, m_RightSpeed) {
   DBUG;
   NormalizeMultipliers(p_leftmultiplier, p_rightmultiplier);
   Clear();
@@ -90,7 +90,7 @@ Sensors<BKND::sensors::type::Analog>::Sensors(int p_port) : m_Port(p_port) {
 }
 float Sensors<BKND::sensors::type::Analog>::Value() const {
   DBUG;
-  return BKND::sensors::nlg::Value(m_Port);
+  return BKND::sensors::analog::Value(m_Port);
 }
 
 Sensors<BKND::sensors::type::Digital>::Sensors(int p_port) : m_Port(p_port) {
@@ -98,7 +98,7 @@ Sensors<BKND::sensors::type::Digital>::Sensors(int p_port) : m_Port(p_port) {
 }
 bool Sensors<BKND::sensors::type::Digital>::Value() const {
   DBUG;
-  return BKND::sensors::dgtl::Value(m_Port);
+  return BKND::sensors::digital::Value(m_Port);
 }
 
 PathFind::PathFind(BKND::pass &motorstoread) : m_Read(motorstoread) { DBUG; }

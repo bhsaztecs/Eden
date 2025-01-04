@@ -9,7 +9,7 @@ public:
   float m_LeftSpeed, m_RightSpeed;
 
   Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
-         float p_rightmultiplier, float p_athenamargin, float p_turnrate);
+         float p_rightmultiplier, float p_wheelradius, float p_wheelbase);
   void Clear() const;
   void Speed(float p_leftgoalpercent, float p_rightgoalpercent,
              float p_timeinseconds) const;
