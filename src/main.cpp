@@ -1,4 +1,5 @@
 #include "../include/interface.h"
+#include <kipr/time/time.h>
 using namespace BKND;
 Motors tank(3, 0, .97, 1, 3.5 / 2, 6.75 / 2);
 Servos arm(0, P2D(315, 0), P2D(1365, 90));
@@ -11,8 +12,8 @@ void Wait(float seconds) {
   msleep(seconds * 1000);
 }
 void printnav() {
-  std::cout << "(" << G_Position.m_X << ", " << G_Position.m_Y << "), "
-            << G_Position.m_Orientation << std::endl;
+  std::cout << "(" << G_Odometry.m_X << ", " << G_Odometry.m_Y << "), "
+            << G_Odometry.m_Orientation << std::endl;
 }
 int main() {
   Thread VELOCITY([]() { motors::Velocity(tank.m_pass); });
@@ -20,7 +21,7 @@ int main() {
   VELOCITY.Run();
   claw.Set(90);
   arm.Set(180);
-  if (true /*tournament mode*/) {
+  if (false /*tournament mode*/) {
     misc::WaitForLight(startlight.m_Port);
     shut_down_in(119);
   }

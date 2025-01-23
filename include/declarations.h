@@ -2,10 +2,14 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <functional>
+#include <initializer_list>
+#include <iomanip>
 #include <iostream>
 #include <kipr/kipr.h>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 using std::string;
@@ -17,6 +21,7 @@ class P2D;    // 2 dimensional coordinate
 using pointpair = std::pair<BKND::P2D, BKND::P2D>;
 class P3D;        // 3 dimensional coordinate
 class worldSpace; // 2 dimensional coordinate with additional functionality
+class IMU;
 class P2D {
 public:
   float m_X;
@@ -26,10 +31,14 @@ public:
   float Angle() const;
   P2D operator-(const P2D &p_other) const;
   P2D operator+(const P2D &p_other) const;
+  P2D operator*(const float scalar);
+  P2D operator/(const float scalar);
   void operator=(const P2D &p_other);
   bool operator==(const P2D &p_other) const;
   void operator+=(const P2D &p_other);
   void operator-=(const P2D &p_other);
+  void operator*=(const float scalar);
+  void operator/=(const float scalar);
 };
 class P3D {
 public:
@@ -42,10 +51,14 @@ public:
   float Yaw() const;
   P3D operator-(const P3D &p_other) const;
   P3D operator+(const P3D &p_other) const;
+  P3D operator*(const float scalar);
+  P3D operator/(const float scalar);
   void operator=(const P3D &p_other);
   bool operator==(const P3D &p_other) const;
   void operator+=(const P3D &p_other);
   void operator-=(const P3D &p_other);
+  void operator*=(const float scalar);
+  void operator/=(const float scalar);
 };
 class worldSpace : public P2D {
 public:
@@ -92,6 +105,7 @@ float lerp(pointpair,
 /* IN {-> (minx,miny) (maxx,maxy) x
  * OUT{-> y at x
  */
+BKND::P2D PointLerp(BKND::P2D, BKND::P2D, float);
 float Interpolate(float); /*get a smooth transition from 0 to 1*/
 /* IN {-> Time (from 1 to 0)
  * OUT{-> value returned from the equation.
@@ -147,6 +161,13 @@ bool Z();
 }; // namespace misc
 
 namespace pathFind {
+using pathfunc = std::function<BKND::P2D(float)>;
+pathfunc MakePath(
+    std::initializer_list<BKND::P2D>); // make a bezier curve of n points
+void FollowPath(
+    pathfunc,
+    float); // follow a path defined by a function that returns points over time
+/* IN {-> path function, total time*/
 void Pathfind(float, float,
               pass); /*Decide which algorithm to use, then uses it.*/
 /* IN {-> Change in Left wheel position, Change in Right wheel position
@@ -172,6 +193,7 @@ float Value(int); // get the value of a port as a percent of the max
 int Raw(int);     // get the raw value of a port
 }; // namespace analog
 namespace accel {
+BKND::P3D Raw();
 void Calibrate();  // calibrates the accelerometer
 float Magnitude(); // gets the magnitude of the vector the accelerometer is
                    // pointing at
@@ -181,6 +203,7 @@ void Update();     // update the vector's values. (automatically called on
                    // mag,pitch,yaw)
 }; // namespace accel
 namespace gyro {
+BKND::P3D Raw();
 void Calibrate();
 float Magnitude();
 float Pitch();
@@ -207,6 +230,7 @@ void Move(int, float, float, pointpair);
 }; // namespace servos
 
 namespace motors {
+float GetLoad(pass);
 void ClearMotorRotations(pass); // sets the counter to 0
 void Velocity(pass); // updates the global velocity variables, keep it in a
                      // thread. it has no end.
@@ -224,15 +248,48 @@ void Brake(pass p_vals);                             // turn on the brakes
 float Interpolate(float p_timepercent);
 class Thread {
 public:
-  thread m_Thread;
-  Thread(void (*p_func)());
-  void Run() const;  // start the thread
-  void Kill() const; // end the thread
-}; // namespace newThread
+  std::thread m_Thread;
+  template <typename Func, typename... Args>
+  Thread(Func &&p_func, Args &&...args)
+      : m_Thread(std::forward<Func>(p_func), std::forward<Args>(args)...) {}
+  void Run() { m_Thread.detach(); }
+  void Kill() { m_Thread.join(); }
+};
+
+class IMU : public P3D {
+  P3D m_Velo;
+  P3D m_Gyro;
+  Thread m_Update;
+  void Update() {
+    sensors::gyro::Calibrate();
+    sensors::accel::Calibrate();
+    P3D error;
+    P3D adjusted;
+    while (1) {
+      const float g = 1527.191202;
+      m_Velo += ((sensors::accel::Raw() + P3D(-1016.325833, -0.050633, g)) *
+                 (386.08858267717 /*ips^s*/ / g)) /
+                10;
+      adjusted = m_Velo + error;
+      m_Gyro += sensors::gyro::Raw() * (3.0 / 245.0);
+      msleep(100);
+
+      m_Pitch = m_Gyro.m_X;
+      m_Yaw = -m_Gyro.m_Z;
+    }
+  }
+
+public:
+  float m_Pitch, m_Yaw;
+  IMU(float p_x, float p_y, float p_z, float p_pitch, float p_yaw)
+      : P3D(p_x, p_y, p_z), m_Update([this]() { Update(); }), m_Pitch(p_pitch),
+        m_Yaw(p_yaw) {}
+};
 
 extern long int G_CurrentMS;
 extern std::ofstream G_file;
-extern worldSpace G_Position;
+extern worldSpace G_Odometry;
+extern IMU G_IMU;
 
 extern BKND::pointpair TTD;
 extern BKND::pointpair TTI;

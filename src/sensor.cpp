@@ -1,4 +1,5 @@
 #include "../include/declarations.h"
+#include <kipr/accel/accel.h>
 
 namespace BKND {
 namespace sensors {
@@ -11,6 +12,10 @@ int Raw(int p_port) { return ::analog(p_port); }
 } // namespace analog
 namespace accel {
 BKND::P3D Value;
+BKND::P3D Raw() {
+  Update();
+  return Value;
+}
 void Calibrate() {
   accel_calibrate();
   BKND::sensors::accel::Update();
@@ -35,6 +40,10 @@ void Update() {
 } // namespace accel
 namespace gyro {
 BKND::P3D Value;
+BKND::P3D Raw() {
+  Update();
+  return Value;
+}
 void Calibrate() { gyro_calibrate(); }
 float Magnitude() {
   BKND::sensors::gyro::Update();

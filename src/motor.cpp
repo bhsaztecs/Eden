@@ -1,6 +1,8 @@
 #include "../include/declarations.h"
+#include <cmath>
 namespace BKND {
 namespace motors {
+float GetLoads(pass p_vals) { return NAN; }
 void ClearMotorRotations(pass p_vals) {
   DBUG;
   cmpc(p_vals.leftmotor);
