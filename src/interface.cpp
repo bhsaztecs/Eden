@@ -1,5 +1,6 @@
 #include "../include/interface.h"
 #include "../include/declarations.h"
+#include <kipr/motor/motor.h>
 void Motors::NormalizeMultipliers(float p_leftmultiplier,
                                   float p_rightmultiplier) {
   DBUG;
@@ -60,27 +61,48 @@ void Motors::Brake() const {
   BKND::motors::Brake(m_pass);
 }
 
-Servos::Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max) {
+Servos::Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max, bool p_ismotor) {
   DBUG;
   m_Port = p_port;
   m_Slope = BKND::pointpair(p_min, p_max);
-  set_servo_enabled(m_Port, 1);
+  m_IsMotor = p_ismotor;
+  if (m_IsMotor) {
+    move_to_position(m_Port, 75, lerp(m_Slope, 0));
+  } else {
+    set_servo_enabled(m_Port, 1);
+  }
 }
 void Servos::Set(float p_angle) const {
   DBUG;
-  BKND::servos::Set(m_Port, p_angle, m_Slope);
+  if (m_IsMotor) {
+    move_to_position(m_Port, 75, lerp(m_Slope, p_angle));
+  } else {
+    BKND::servos::Set(m_Port, p_angle, m_Slope);
+  }
 }
 void Servos::Change(float p_angle) const {
   DBUG;
-  BKND::servos::Change(m_Port, p_angle, m_Slope);
+  if (m_IsMotor) {
+    move_to_position(m_Port, 75, lerp(m_Slope, p_angle) + gmpc(m_Port));
+  } else {
+    BKND::servos::Change(m_Port, p_angle, m_Slope);
+  }
 }
 void Servos::GoTo(float p_angle, float p_time) const {
   DBUG;
-  BKND::servos::Move(m_Port, p_angle, p_time, m_Slope);
+  if (m_IsMotor) {
+    move_to_position(m_Port, 1 / p_time, lerp(m_Slope, p_angle));
+  } else {
+    BKND::servos::Move(m_Port, p_angle, p_time, m_Slope);
+  }
 }
 float Servos::Angle() const {
   DBUG;
-  return BKND::lerp(m_Slope, get_servo_position(m_Port));
+  if (m_IsMotor) {
+    return BKND::lerp(m_Slope, gmpc(m_Port));
+  } else {
+    return BKND::lerp(m_Slope, get_servo_position(m_Port));
+  }
 }
 
 Sensors<BKND::sensors::type::Analog>::Sensors(int p_port) : m_Port(p_port) {

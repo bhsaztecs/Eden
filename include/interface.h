@@ -22,10 +22,12 @@ public:
   void Brake() const;
 };
 class Servos {
+  bool m_IsMotor;
+
 public:
   int m_Port;
   BKND::pointpair m_Slope;
-  Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max);
+  Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max, bool p_ismotor = false);
   void Set(float p_angle) const;
   void Change(float p_angle) const;
   void GoTo(float p_angle, float p_time) const;
