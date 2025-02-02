@@ -1,5 +1,6 @@
 #include "../include/declarations.h"
 #include <initializer_list>
+#include <math.h>
 namespace BKND {
 namespace pathFind {
 void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
@@ -39,7 +40,7 @@ void FollowPath(pathfunc p_path, float p_time, pass p_vals) {
     BKND::pathFind::GoTo(p_path((float)i / polls), p_time / polls, p_vals);
   }
 }
-pathfunc MakePath(std::initializer_list<BKND::P2D> p_points) {
+pathfunc MakeSinglePath(std::initializer_list<BKND::P2D> p_points) {
   std::vector<BKND::P2D> points(p_points);
   return [points](float t) -> BKND::P2D {
     int n = points.size() - 1;
@@ -56,6 +57,19 @@ pathfunc MakePath(std::initializer_list<BKND::P2D> p_points) {
       result = result + BKND::P2D(points[i].m_X * coeff, points[i].m_Y * coeff);
     }
     return result;
+  };
+}
+pathfunc
+MakePath(std::initializer_list<std::initializer_list<BKND::P2D>> p_points) {
+  std::vector<std::initializer_list<BKND::P2D>> points(p_points);
+  std::vector<pathfunc> funcs;
+  for (auto pointset : points) {
+    funcs.push_back(MakeSinglePath(pointset));
+  }
+  return [funcs](float t) -> BKND::P2D {
+    // scale t down by funcs.len(), run func(t % funcs.len())
+    return funcs[roundf(t * funcs.size())](
+        fmod(t * funcs.size(), funcs.size()));
   };
 }
 } // namespace pathFind
