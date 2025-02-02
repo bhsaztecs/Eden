@@ -15,9 +15,9 @@ BKND::pointpair TPSTP(BKND::P2D(0, 0), BKND::P2D(1386, 100));
 
 long int G_CurrentMS = 0;
 std::ofstream G_file("data/log.txt");
-std::vector<worldSpace *> G_Obstacles;
-worldSpace G_Position(0, 0, 0, 0);
-
+vector<worldSpace *> G_Obstacles;
+worldSpace G_Odometry(0, 0, 0, 0);
+IMU G_IMU(0, 0, 0, 0, 0);
 string PrettyTime(int p_ms) {
   int min;
   int sec;
@@ -43,10 +43,8 @@ string PrettyTime(int p_ms) {
 
 float Rad(float p_degrees) { return p_degrees * 0.01745329251; }
 float Deg(float p_radians) { return p_radians * 57.2957795131; }
-float mm(float p_inches) { return p_inches * 25.4; }
-float inch(float p_mm) { return p_mm / 25.4; }
 
-float lerp(pointpair p_slope, float p_x) {
+float UnitConvert(pointpair p_slope, float p_x) {
   float dely = p_slope.second.m_Y - p_slope.first.m_Y;
   float delx = p_slope.second.m_X - p_slope.first.m_X;
   float m = dely / delx;
@@ -54,13 +52,6 @@ float lerp(pointpair p_slope, float p_x) {
   return (m * p_x) + b;
 }
 
-P2D::P2D(float p_x, float p_y) {
-  this->m_X = p_x;
-  this->m_Y = p_y;
-}
-float P2D::Magnitude() const {
-  return std::sqrt(std::pow(m_X, 2) + std::pow(m_Y, 2));
-}
 float NormalizeAngle(float p_angle) {
   float angle = fmod(p_angle, 360.0);
   if (angle < -180) {
@@ -70,19 +61,32 @@ float NormalizeAngle(float p_angle) {
   }
   return angle;
 }
-float P2D::Angle() const { return Deg(std::atan2(m_Y, m_X)); }
-P2D P2D::operator-(const P2D &p_other) const {
-  return P2D(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y);
+P2D::P2D(float p_x, float p_y) {
+  this->m_X = p_x;
+  this->m_Y = p_y;
+}
+float P2D::Magnitude() {
+  return std::sqrt(std::pow(m_X, 2) + std::pow(m_Y, 2));
+}
+float P2D::Angle() { return Deg(std::atan2(m_Y, m_X)); }
+bool P2D::operator==(const P2D &p_other) const {
+  return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y);
 }
 P2D P2D::operator+(const P2D &p_other) const {
   return P2D(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
 }
+P2D P2D::operator-(const P2D &p_other) const {
+  return P2D(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y);
+}
+P2D P2D::operator*(const float scalar) const {
+  return P2D(this->m_X * scalar, this->m_Y * scalar);
+}
+P2D P2D::operator/(const float scalar) const {
+  return P2D(this->m_X / scalar, this->m_Y / scalar);
+}
 void P2D::operator=(const P2D &p_other) {
   this->m_X = p_other.m_X;
   this->m_Y = p_other.m_Y;
-}
-bool P2D::operator==(const P2D &p_other) const {
-  return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y);
 }
 void P2D::operator+=(const P2D &p_other) {
   P2D temp(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
@@ -94,33 +98,47 @@ void P2D::operator-=(const P2D &p_other) {
   this->m_X = temp.m_X;
   this->m_Y = temp.m_Y;
 }
+void P2D::operator*=(const float scalar) {
+  this->m_X *= scalar;
+  this->m_Y *= scalar;
+}
+void P2D::operator/=(const float scalar) {
+  this->m_X /= scalar;
+  this->m_Y /= scalar;
+}
 
 P3D::P3D(float p_x, float p_y, float p_z) {
   this->m_X = p_x;
   this->m_Y = p_y;
   this->m_Z = p_z;
 }
-float P3D::Magnitude() const {
+float P3D::Magnitude() {
   return std::sqrt(std::pow(m_X, 2) + std::pow(m_Y, 2) + std::pow(m_Z, 2));
 }
-float P3D::Pitch() const { return Deg(std::atan(m_Y / m_Z)); }
-float P3D::Yaw() const { return Deg(std::atan(m_X / m_Z)); }
-P3D P3D::operator-(const P3D &p_other) const {
-  return P3D(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-             this->m_Z - p_other.m_Z);
+float P3D::Pitch() { return Deg(std::atan(m_Y / m_Z)); }
+float P3D::Yaw() { return Deg(std::atan(m_X / m_Z)); }
+bool P3D::operator==(const P3D &p_other) const {
+  return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y) &&
+         (this->m_Z == p_other.m_Z);
 }
 P3D P3D::operator+(const P3D &p_other) const {
   return P3D(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
              this->m_Z + p_other.m_Z);
 }
+P3D P3D::operator-(const P3D &p_other) const {
+  return P3D(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
+             this->m_Z - p_other.m_Z);
+}
+P3D P3D::operator*(const float scalar) const {
+  return P3D(this->m_X * scalar, this->m_Y * scalar, this->m_Z * scalar);
+}
+P3D P3D::operator/(const float scalar) const {
+  return P3D(this->m_X / scalar, this->m_Y / scalar, this->m_Z / scalar);
+}
 void P3D::operator=(const P3D &p_other) {
   this->m_X = p_other.m_X;
   this->m_Y = p_other.m_Y;
   this->m_Z = p_other.m_Z;
-}
-bool P3D::operator==(const P3D &p_other) const {
-  return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y) &&
-         (this->m_Z == p_other.m_Z);
 }
 void P3D::operator+=(const P3D &p_other) {
   P3D temp(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
@@ -136,6 +154,16 @@ void P3D::operator-=(const P3D &p_other) {
   this->m_Y = temp.m_Y;
   this->m_Z = temp.m_Z;
 }
+void P3D::operator*=(const float scalar) {
+  this->m_X *= scalar;
+  this->m_Y *= scalar;
+  this->m_Z *= scalar;
+}
+void P3D::operator/=(const float scalar) {
+  this->m_X /= scalar;
+  this->m_Y /= scalar;
+  this->m_Z /= scalar;
+}
 
 worldSpace::worldSpace(float p_x, float p_y, float p_o, float p_r) {
   this->m_Orientation = p_o;
@@ -143,20 +171,28 @@ worldSpace::worldSpace(float p_x, float p_y, float p_o, float p_r) {
   this->m_Y = p_y;
   this->m_Radius = p_r;
 }
-bool worldSpace::operator==(const worldSpace &p_other) {
+bool worldSpace::operator==(const worldSpace &p_other) const {
   return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y) &&
          (this->m_Orientation == p_other.m_Orientation);
 }
-bool worldSpace::operator!=(const worldSpace &p_other) {
+bool worldSpace::operator!=(const worldSpace &p_other) const {
   return (this != &p_other);
 }
-worldSpace worldSpace::operator-(const P2D &p_other) {
+worldSpace worldSpace::operator+(const P2D &p_other) const {
+  return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
+                    (this->m_Orientation));
+}
+worldSpace worldSpace::operator-(const P2D &p_other) const {
   return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
                     (this->m_Orientation));
 }
-worldSpace worldSpace::operator+(const P2D &p_other) {
+worldSpace worldSpace::operator-(const worldSpace &p_other) const {
+  return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
+                    (this->m_Orientation - p_other.m_Orientation));
+}
+worldSpace worldSpace::operator+(const worldSpace &p_other) const {
   return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-                    (this->m_Orientation));
+                    this->m_Orientation + p_other.m_Orientation);
 }
 void worldSpace::operator+=(const P2D &p_other) {
   P2D temp(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
@@ -168,14 +204,7 @@ void worldSpace::operator-=(const P2D &p_other) {
   this->m_X = temp.m_X;
   this->m_Y = temp.m_Y;
 }
-worldSpace worldSpace::operator-(const worldSpace &p_other) {
-  return worldSpace(this->m_X - p_other.m_X, this->m_Y - p_other.m_Y,
-                    (this->m_Orientation - p_other.m_Orientation));
-}
-worldSpace worldSpace::operator+(const worldSpace &p_other) {
-  return worldSpace(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
-                    this->m_Orientation + p_other.m_Orientation);
-}
+
 void worldSpace::operator+=(const worldSpace &p_other) {
   *this = (*this + p_other);
 }
@@ -190,18 +219,7 @@ float Interpolate(float p_timepercent) {
       std::pow(p_timepercent, 2.16) /
       (std::pow(p_timepercent, 2.16) + (std::pow((1 - p_timepercent), 2.16))));
 }
-
-Thread::Thread(
-    void (*p_func)()) { // create a new thread with a function as a parameter
-  DBUG;
-  m_Thread = thread_create(p_func);
-}
-void Thread::Run() const { // start the thread
-  DBUG;
-  thread_start(m_Thread);
-}
-void Thread::Kill() const { // end the thread
-  DBUG;
-  thread_destroy(m_Thread);
+BKND::P2D PointLerp(BKND::P2D p_0, BKND::P2D p_1, float p_t) {
+  return p_0 + ((p_1 - p_0) * p_t);
 }
 } // namespace BKND

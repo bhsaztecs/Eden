@@ -1,23 +1,28 @@
 #!/bin/sh
 copy() {
-        scp -r * kipr@192.168.125.1:~/Documents/KISS/$1
+    ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
+    if scp -r * "kipr@192.168.125.1:~/Documents/KISS/$1"; then
+        return 0;
+    else
+	return 1;
+    fi
 }
+
 shell() {
-        ssh kipr@192.168.125.1
+    ssh kipr@192.168.125.1
 }
-crosscomp() {
-        sudo aarch64-linux-gnu-g++ -std=c++17 -g \
-        -I"include/*" -I \
-        "/usr/local/include/include" \
-        -Wall "src/*.cpp" -L"/usr/local/lib" \
-        -lkipr -lm -o "bin/botball_user_program" \
-        -lz -lpthread
-}
-comp() {
-        sudo g++ -std=c++17 -g \
-        -I"include/*" -I \
-        "/usr/local/include/include" \
-        -Wall "src/*.cpp" -L"/usr/local/lib" \
-        -lkipr -lm -o "bin/botball_user_program" \
-        -lz -lpthread
+
+compile() {
+	echo "Compiling...";
+    if wombatcompile; then
+        if copy "$1"; then
+            echo -n "Succeeded at: "
+        else
+            echo -n "Copy failed at: "
+        fi
+    else
+        [ -d develop ] && rm -r develop
+        echo -n "Compilation failed at: "
+    fi
+    date +"%r"
 }
