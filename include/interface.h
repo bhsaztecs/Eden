@@ -1,8 +1,8 @@
 #pragma once
 #include "declarations.h"
 class Motors {
-  void Velocity() const; // update velocity reading of these motors every 10 ms.
-                         // DOES NOT END
+  void Velocity(); // update velocity reading of these motors every 10 ms.
+                   // DOES NOT END
   void
   NormalizeMultipliers(float p_leftmultiplier,
                        float p_rightmultiplier); // maxes out motor multipliers
@@ -15,22 +15,23 @@ public:
   float m_LeftSpeed, m_RightSpeed; // the speed that the left and right motors
                                    // are going. read, dont write.
 
+  ~Motors();
   Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
          float p_rightmultiplier, float p_wheelradius, float p_wheelbase);
-  void Clear() const; // clear motor position counter.
-  void Speed(float p_leftgoalpercent, float p_rightgoalpercent,
-             float p_timeinseconds)
-      const; // drive at left speed, right speed for seconds
+  void Clear(); // clear motor position counter.
+  void
+  Speed(float p_leftgoalpercent, float p_rightgoalpercent,
+        float p_timeinseconds); // drive at left speed, right speed for seconds
   void Rotation(float p_leftgoaldegrees, float p_rightgoaldegrees,
-                float p_timeinseconds)
-      const; // rotate the wheels this many more degrees in this many seconds
+                float p_timeinseconds); // rotate the wheels this many more
+                                        // degrees in this many seconds
   void Distance(float p_leftgoalinches, float p_rightgoalinches,
-                float p_timeinseconds)
-      const; // drive this many more inches in this many seconds
+                float p_timeinseconds); // drive this many more inches in this
+                                        // many seconds
   void Accelerate(float p_leftgoalpercent, float p_rightgoalpercent,
-                  float p_timeinseconds)
-      const; // accelerate from current speed to goal speed in this many seconds
-  void Brake() const;
+                  float p_timeinseconds); // accelerate from current speed to
+                                          // goal speed in this many seconds
+  void Brake();
 };
 class Servos {
   static void MotorSet(int p_port,
@@ -41,10 +42,10 @@ public:
   int m_Port;
   BKND::pointpair m_Slope; // unit conversion
   Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max, bool p_ismotor = false);
-  void Set(float p_angle) const;                // go to angle
-  void Change(float p_angle) const;             // add p_angle degrees to angle
-  void GoTo(float p_angle, float p_time) const; // go to angle slowly
-  float Angle() const;                          // get angle
+  void Set(float p_angle);                // go to angle
+  void Change(float p_angle);             // add p_angle degrees to angle
+  void GoTo(float p_angle, float p_time); // go to angle slowly
+  float Angle();                          // get angle
 };
 
 template <BKND::sensors::type> class Sensors {
@@ -59,21 +60,23 @@ public:
   int m_Port;
 
   Sensors(int p_port);
-  float Value() const; // get value of sensor from 0-1
+  float Value(); // get value of sensor from 0-1
 };
 template <> class Sensors<BKND::sensors::type::Digital> {
 public:
   int m_Port;
 
   Sensors(int p_port);
-  bool Value() const; // get value of sensor 0/1
+  bool Value(); // get value of sensor 0/1
 };
 
 class PathFind {
 public:
   BKND::pass m_Read;
-  PathFind(BKND::pass &p_motorstoread);            // pass m_Pass from Motors
-  void GoTo(BKND::P2D p_goal, float p_time) const; // go to point in p_time
+  PathFind(BKND::pass &p_motorstoread);      // pass m_Pass from Motors
+  void GoTo(BKND::P2D p_goal, float p_time); // go to point in p_time
   void Face(float p_goal,
-            float p_time) const; // face angle (in degrees) in p_time
+            float p_time); // face angle (in degrees) in p_time
+  void FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
+                  float p_start = 0, float p_end = 1);
 };

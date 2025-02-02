@@ -1,6 +1,10 @@
 #include "../include/interface.h"
 #include "../include/declarations.h"
-#include <kipr/motor/motor.h>
+Motors::~Motors() {
+  Brake();
+  off(m_Pass.leftmotor);
+  off(m_Pass.rightmotor);
+}
 void Motors::NormalizeMultipliers(float p_leftmultiplier,
                                   float p_rightmultiplier) {
   DBUG;
@@ -25,39 +29,39 @@ Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
   Clear();
   BKND::Thread VELOCITY([this]() { this->Velocity(); });
 }
-void Motors::Clear() const {
+void Motors::Clear() {
   DBUG;
   BKND::motors::ClearMotorRotations(m_Pass);
 }
-void Motors::Velocity() const {
+void Motors::Velocity() {
   DBUG;
   BKND::motors::Velocity(m_Pass);
 }
 void Motors::Speed(float p_leftgoalpercent, float p_rightgoalpercent,
-                   float p_timeinseconds) const {
+                   float p_timeinseconds) {
   DBUG;
   BKND::motors::Speed(p_leftgoalpercent, p_rightgoalpercent, p_timeinseconds,
                       m_Pass);
 }
 void Motors::Rotation(float p_leftgoaldegrees, float p_rightgoaldegrees,
-                      float p_timeinseconds) const {
+                      float p_timeinseconds) {
   DBUG;
   BKND::motors::Rotation(p_leftgoaldegrees, p_rightgoaldegrees, p_timeinseconds,
                          m_Pass);
 }
 void Motors::Distance(float p_leftgoalinches, float p_rightgoalinches,
-                      float p_timeinseconds) const {
+                      float p_timeinseconds) {
   DBUG;
   BKND::motors::Distance(p_leftgoalinches, p_rightgoalinches, p_timeinseconds,
                          m_Pass);
 }
 void Motors::Accelerate(float p_leftgoalpercent, float p_rightgoalpercent,
-                        float p_timeinseconds) const {
+                        float p_timeinseconds) {
   DBUG;
   BKND::motors::Accelerate(p_leftgoalpercent, p_rightgoalpercent,
                            p_timeinseconds, m_Pass);
 }
-void Motors::Brake() const {
+void Motors::Brake() {
   DBUG;
   BKND::motors::Brake(m_Pass);
 }
@@ -71,28 +75,28 @@ Servos::Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max, bool p_ismotor) {
     set_servo_enabled(m_Port, 1);
   }
 }
-void Servos::Set(float p_angle) const {
+void Servos::Set(float p_angle) {
   DBUG;
   if (m_IsMotor) {
-    Servos::MotorSet(m_Port, lerp(m_Slope, p_angle));
+    Servos::MotorSet(m_Port, UnitConvert(m_Slope, p_angle));
   } else {
     BKND::servos::Set(m_Port, p_angle, m_Slope);
   }
 }
-void Servos::Change(float p_angle) const {
+void Servos::Change(float p_angle) {
   DBUG;
   BKND::servos::Change(m_Port, p_angle, m_Slope);
 }
-void Servos::GoTo(float p_angle, float p_time) const {
+void Servos::GoTo(float p_angle, float p_time) {
   DBUG;
   BKND::servos::Move(m_Port, p_angle, p_time, m_Slope);
 }
-float Servos::Angle() const {
+float Servos::Angle() {
   DBUG;
   if (m_IsMotor) {
-    return BKND::lerp(Inverse(m_Slope), gmpc(m_Port));
+    return BKND::UnitConvert(Inverse(m_Slope), gmpc(m_Port));
   } else {
-    return BKND::lerp(Inverse(m_Slope), get_servo_position(m_Port));
+    return BKND::UnitConvert(Inverse(m_Slope), get_servo_position(m_Port));
   }
 }
 void Servos::MotorSet(int p_port, int p_ticks) {
@@ -111,7 +115,7 @@ void Servos::MotorSet(int p_port, int p_ticks) {
 Sensors<BKND::sensors::type::Analog>::Sensors(int p_port) : m_Port(p_port) {
   DBUG;
 }
-float Sensors<BKND::sensors::type::Analog>::Value() const {
+float Sensors<BKND::sensors::type::Analog>::Value() {
   DBUG;
   return BKND::sensors::analog::Value(m_Port);
 }
@@ -119,17 +123,22 @@ float Sensors<BKND::sensors::type::Analog>::Value() const {
 Sensors<BKND::sensors::type::Digital>::Sensors(int p_port) : m_Port(p_port) {
   DBUG;
 }
-bool Sensors<BKND::sensors::type::Digital>::Value() const {
+bool Sensors<BKND::sensors::type::Digital>::Value() {
   DBUG;
   return BKND::sensors::digital::Value(m_Port);
 }
 
 PathFind::PathFind(BKND::pass &motorstoread) : m_Read(motorstoread) { DBUG; }
-void PathFind::GoTo(BKND::P2D p_goal, float p_time) const {
+void PathFind::GoTo(BKND::P2D p_goal, float p_time) {
   DBUG;
   BKND::pathFind::GoTo(p_goal, p_time, m_Read);
 }
-void PathFind::Face(float p_goal, float p_time) const {
+void PathFind::Face(float p_goal, float p_time) {
   DBUG;
   BKND::pathFind::Face(p_goal, p_time, m_Read);
+}
+void PathFind::FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
+                          float p_start, float p_end) {
+  DBUG;
+  BKND::pathFind::FollowPath(p_path, p_time, p_start, p_end, m_Read);
 }

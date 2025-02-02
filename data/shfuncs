@@ -13,6 +13,7 @@ shell() {
 }
 
 compile() {
+	echo "Compiling...";
     if wombatcompile; then
         if copy "$1"; then
             echo -n "Succeeded at: "
@@ -25,4 +26,3 @@ compile() {
     fi
     date +"%r"
 }
-

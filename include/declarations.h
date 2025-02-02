@@ -1,19 +1,15 @@
 #pragma once
-#include <chrono>
-#include <cmath>
-#include <cstdarg>
 #include <fstream>
 #include <functional>
 #include <initializer_list>
-#include <iomanip>
 #include <iostream>
 #include <kipr/kipr.h>
-#include <sstream>
-#include <string>
+#include <limits>
 #include <thread>
-#include <utility>
 #include <vector>
 using std::string;
+using std::vector; // IGNORE CLANG
+template <typename T> using initlist = std::initializer_list<T>;
 
 namespace BKND { // backend
 
@@ -28,14 +24,14 @@ public:
   float m_X;
   float m_Y;
   P2D(float x = 0, float y = 0);
-  float Magnitude() const;
-  float Angle() const;                     // angle relative (0,0) in degrees
-  P2D operator-(const P2D &p_other) const; // translate
-  P2D operator+(const P2D &p_other) const;
-  P2D operator*(const float p_scalar); // scale
-  P2D operator/(const float p_scalar);
-  void operator=(const P2D &p_other);        // set
+  float Magnitude();
+  float Angle(); // angle relative to (0,0) in degrees
   bool operator==(const P2D &p_other) const; // compare
+  P2D operator+(const P2D &p_other) const;   // translate
+  P2D operator-(const P2D &p_other) const;
+  P2D operator*(const float p_scalar) const; // scale
+  P2D operator/(const float p_scalar) const;
+  void operator=(const P2D &p_other); // set
   void operator+=(const P2D &p_other);
   void operator-=(const P2D &p_other);
   void operator*=(const float p_scalar);
@@ -47,15 +43,15 @@ public:
   float m_Y;
   float m_Z;
   P3D(float p_x = 0, float p_y = 0, float p_z = 0);
-  float Magnitude() const;
-  float Pitch() const;
-  float Yaw() const;
-  P3D operator-(const P3D &p_other) const;
-  P3D operator+(const P3D &p_other) const;
-  P3D operator*(const float p_scalar);
-  P3D operator/(const float p_scalar);
-  void operator=(const P3D &p_other);
+  float Magnitude();
+  float Pitch();
+  float Yaw();
   bool operator==(const P3D &p_other) const;
+  P3D operator+(const P3D &p_other) const;
+  P3D operator-(const P3D &p_other) const;
+  P3D operator*(const float p_scalar) const;
+  P3D operator/(const float p_scalar) const;
+  void operator=(const P3D &p_other);
   void operator+=(const P3D &p_other);
   void operator-=(const P3D &p_other);
   void operator*=(const float p_scalar);
@@ -68,15 +64,15 @@ public:
 
   worldSpace(float p_x = 0, float p_y = 0, float p_o = 0, float p_r = 0);
 
-  bool operator==(const worldSpace &p_other); // is coliding with other?
-  bool operator!=(const worldSpace &p_other);
-  worldSpace operator-(const P2D &p_other);
-  worldSpace operator+(const P2D &p_other);
+  bool operator==(const worldSpace &p_other) const; // is coliding with other?
+  bool operator!=(const worldSpace &p_other) const;
+  worldSpace operator+(const P2D &p_other) const;
+  worldSpace operator+(const worldSpace &p_other) const;
+  worldSpace operator-(const P2D &p_other) const;
+  worldSpace operator-(const worldSpace &p_other) const;
   void operator+=(const P2D &p_other);
-  void operator-=(const P2D &p_other);
-  worldSpace operator-(const worldSpace &p_other);
-  worldSpace operator+(const worldSpace &p_other);
   void operator+=(const worldSpace &p_other);
+  void operator-=(const P2D &p_other);
   void operator-=(const worldSpace &p_other);
   worldSpace operator=(const worldSpace &p_other);
 }; // namespace worldSpace:public P2D
@@ -110,8 +106,9 @@ float NormalizeAngle(float p_angle); // normalize angle to +- 180 deg
 float Rad(float p_degrees); // deg to rad
 /* IN: Degrees
  * OUT: Radians */
-float lerp(pointpair p_conversion,
-           float p_x); // interpolate from point a to point b
+
+float UnitConvert(pointpair p_conversion,
+                  float p_x); // interpolate from point a to point b
 /* IN: pointpair (2 points), any,
  * OUT: point
  * EG: lerp(pointpair(P2D(0,0),P2D(1,2)),10) == 20
@@ -141,9 +138,7 @@ string PrettyTime(int p_milliseconds); /*display milliseconds as min:sec.ms*/
 
 namespace misc {
 void WaitForLight(int p_port); // wait until a light turns on to do next move
-void Timer();    // starts a clock, updates a global variable, DOES NOT END
-void HandsOff(); // starts HandsOff sequence, dont touch the bot after this at
-                 // competition
+void Timer(); // starts a clock, updates a global variable, DOES NOT END
 
 namespace buttons {
 void Show(bool p_visibility); // set visibility of buttons
@@ -178,23 +173,22 @@ bool Z();
 namespace pathFind {
 using pathfunc = std::function<BKND::P2D(
     float)>; // any function that takes a time value and returns a point
-pathfunc MakePath(std::initializer_list<BKND::P2D>
-                      p_pointlist); // makes an n degree bezier curve
+pathfunc
+MakePath(initlist<BKND::P2D> p_pointlist); // makes an n degree bezier curve
 /* IN: point0,point1,..,pointN
  * OUT: pathfunc from 0-1
  * EG: MakeSinglePath({P2D(0,0),P2D(0,1),P2D(1,1)});
  */
-pathfunc MakePath(std::initializer_list<std::initializer_list<BKND::P2D>>
+pathfunc MakePath(initlist<initlist<BKND::P2D>>
                       p_pointlistlist); // makes multiple n degree bezier
                                         // curves, stitches them together
-                                        /* IN: point0,point1,..,pointN
-                                        * OUT: pathfunc from 0-1
-                                        * EG: MakeSinglePath({{P2D(0,0),P2D(0,1),P2D(1,1)},
-                                                             {P2D(1,1),P2D(2,1)},
-                                                             {P2D(2,1),P2D(0,0)}}); */
-pathfunc
-MakePath(std::initializer_list<pathfunc> p_pathlist); // stitch curves together
-void FollowPath(pathfunc p_path, float p_time,
+/* IN: point0,point1,..,pointN
+* OUT: pathfunc from 0-1
+* EG: MakeSinglePath({{P2D(0,0),P2D(0,1),P2D(1,1)},
+                        {P2D(1,1),P2D(2,1)},
+                        {P2D(2,1),P2D(0,0)}}); */
+pathfunc MakePath(initlist<pathfunc> p_pathlist); // stitch curves together
+void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
                 pass p_vals); // follow the pathfunction given in p_time seconds
 float PathLength(pathfunc p_path, float p_start = 0, float p_end = 1);
 void Pathfind(float p_deltal, float p_deltar,
@@ -231,8 +225,8 @@ float Magnitude();
 float Pitch();
 float Yaw();
 void Update();
-}; // namespace gyro
-namespace mag {
+};              // namespace gyro
+namespace mag { // TODO
 void Calibrate();
 float Magnitude();
 float Pitch();
@@ -295,7 +289,7 @@ class IMU : public P3D {
     P3D error;
     P3D adjusted;
     while (1) {
-      const float g = 1527.191202;
+      float g = 1527.191202;
       m_Velo += ((sensors::accel::Raw() + P3D(-1016.325833, -0.050633, g)) *
                  (386.08858267717 /*i/s^2*/ / g)) /
                 10;

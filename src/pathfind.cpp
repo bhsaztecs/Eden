@@ -1,5 +1,6 @@
 #include "../include/declarations.h"
 #include <initializer_list>
+#include <limits>
 #include <math.h>
 namespace BKND {
 namespace pathFind {
@@ -34,17 +35,10 @@ void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
   BKND::pathFind::Face(delta.Angle(), ftime, p_vals);
   BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), dtime, p_vals);
 }
-void FollowPath(pathfunc p_path, float p_time, pass p_vals) {
+void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
+                pass p_vals) {
   float dt = 0.001;
-  GoTo(p_path(0),
-       PathLength(
-           MakePath({BKND::P2D(G_Odometry.m_X, G_Odometry.m_Y), p_path(0)})),
-       p_vals);
-  GoTo(p_path(dt),
-       PathLength(
-           MakePath({BKND::P2D(G_Odometry.m_X, G_Odometry.m_Y), p_path(dt)})),
-       p_vals);
-  for (float t = 2 * dt; t < 1; t += dt) {
+  for (float t = p_start; t < p_end; t += dt) {
     GoTo(p_path(t), p_time * dt, p_vals);
   }
 }
@@ -56,8 +50,8 @@ float PathLength(pathfunc p_path, float p_start, float p_end) {
   }
   return length;
 }
-pathfunc MakePath(std::initializer_list<BKND::P2D> p_points) {
-  std::vector<BKND::P2D> points(p_points);
+pathfunc MakePath(initlist<BKND::P2D> p_points) {
+  vector<BKND::P2D> points(p_points);
   return [points](float t) -> BKND::P2D {
     int n = points.size() - 1;
     BKND::P2D result(0, 0);
@@ -75,18 +69,18 @@ pathfunc MakePath(std::initializer_list<BKND::P2D> p_points) {
     return result;
   };
 }
-pathfunc MakePath(std::initializer_list<pathfunc> p_funcs) {
-  std::vector<pathfunc> funcs(p_funcs);
+pathfunc MakePath(initlist<pathfunc> p_funcs) {
+  vector<pathfunc> funcs(p_funcs);
   return [funcs](float t) -> BKND::P2D {
     // scale t down by funcs.len(), run func(t % funcs.len())
-    return funcs[roundf(t * funcs.size())](
+    return funcs[floorf(((t - std::numeric_limits<float>::epsilon()) *
+                         funcs.size()) /* rounds up if t = 1 */)](
         fmod(t * funcs.size(), funcs.size()));
   };
 }
-pathfunc
-MakePath(std::initializer_list<std::initializer_list<BKND::P2D>> p_points) {
-  std::vector<std::initializer_list<BKND::P2D>> points(p_points);
-  std::vector<pathfunc> funcs;
+pathfunc MakePath(initlist<initlist<BKND::P2D>> p_points) {
+  vector<initlist<BKND::P2D>> points(p_points);
+  vector<pathfunc> funcs;
   for (auto pointset : points) {
     funcs.push_back(MakePath(pointset));
   }

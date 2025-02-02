@@ -24,14 +24,9 @@ int main() {
   TIMER.Run();
   pathFind::pathfunc func =
       pathFind::MakePath({P2D(0, 0), P2D(0, 10), P2D(10, 10)});
-  float n = 0.01;
-  nav.GoTo(func(n), 0.5);
-  for (float i = n; i <= 1; i += n) {
-    std::cout << "f(" << i << ")={" << func(i).m_X << "," << func(i).m_Y << "}"
-              << std::endl;
-    nav.GoTo(func(i), n * 15);
-    printnav();
-  }
+  nav.GoTo(func(0), 1);            // reach point first
+  nav.GoTo(func(0.001), .5);       // reach angle
+  nav.FollowPath(func, 10, 0.002); // follow path
   ao();
   G_file.close();
   return 0;
