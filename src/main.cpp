@@ -22,7 +22,6 @@ int main() {
     shut_down_in(119);
   }
   TIMER.Run();
-  std::cout << "here";
   pathFind::pathfunc func =
       pathFind::MakePath({P2D(0, 0), P2D(0, 10), P2D(10, 10)});
   float n = 0.01;

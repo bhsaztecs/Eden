@@ -35,12 +35,28 @@ void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
   BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), dtime, p_vals);
 }
 void FollowPath(pathfunc p_path, float p_time, pass p_vals) {
-  int polls = 10 * p_time; // ten times per second
-  for (int i = 0; i < polls; i++) {
-    BKND::pathFind::GoTo(p_path((float)i / polls), p_time / polls, p_vals);
+  float dt = 0.001;
+  GoTo(p_path(0),
+       PathLength(
+           MakePath({BKND::P2D(G_Odometry.m_X, G_Odometry.m_Y), p_path(0)})),
+       p_vals);
+  GoTo(p_path(dt),
+       PathLength(
+           MakePath({BKND::P2D(G_Odometry.m_X, G_Odometry.m_Y), p_path(dt)})),
+       p_vals);
+  for (float t = 2 * dt; t < 1; t += dt) {
+    GoTo(p_path(t), p_time * dt, p_vals);
   }
 }
-pathfunc MakeSinglePath(std::initializer_list<BKND::P2D> p_points) {
+float PathLength(pathfunc p_path, float p_start, float p_end) {
+  float length = 0;
+  float dt = 0.001;
+  for (float t = p_start; t < p_end; t += dt) {
+    length += (p_path(t + dt) - p_path(t)).Magnitude() * dt;
+  }
+  return length;
+}
+pathfunc MakePath(std::initializer_list<BKND::P2D> p_points) {
   std::vector<BKND::P2D> points(p_points);
   return [points](float t) -> BKND::P2D {
     int n = points.size() - 1;
@@ -59,12 +75,20 @@ pathfunc MakeSinglePath(std::initializer_list<BKND::P2D> p_points) {
     return result;
   };
 }
+pathfunc MakePath(std::initializer_list<pathfunc> p_funcs) {
+  std::vector<pathfunc> funcs(p_funcs);
+  return [funcs](float t) -> BKND::P2D {
+    // scale t down by funcs.len(), run func(t % funcs.len())
+    return funcs[roundf(t * funcs.size())](
+        fmod(t * funcs.size(), funcs.size()));
+  };
+}
 pathfunc
 MakePath(std::initializer_list<std::initializer_list<BKND::P2D>> p_points) {
   std::vector<std::initializer_list<BKND::P2D>> points(p_points);
   std::vector<pathfunc> funcs;
   for (auto pointset : points) {
-    funcs.push_back(MakeSinglePath(pointset));
+    funcs.push_back(MakePath(pointset));
   }
   return [funcs](float t) -> BKND::P2D {
     // scale t down by funcs.len(), run func(t % funcs.len())

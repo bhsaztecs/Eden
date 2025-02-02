@@ -32,14 +32,14 @@ public:
   float Angle() const;                     // angle relative (0,0) in degrees
   P2D operator-(const P2D &p_other) const; // translate
   P2D operator+(const P2D &p_other) const;
-  P2D operator*(const float scalar); // scale
-  P2D operator/(const float scalar);
+  P2D operator*(const float p_scalar); // scale
+  P2D operator/(const float p_scalar);
   void operator=(const P2D &p_other);        // set
   bool operator==(const P2D &p_other) const; // compare
   void operator+=(const P2D &p_other);
   void operator-=(const P2D &p_other);
-  void operator*=(const float scalar);
-  void operator/=(const float scalar);
+  void operator*=(const float p_scalar);
+  void operator/=(const float p_scalar);
 };
 class P3D {
 public:
@@ -52,14 +52,14 @@ public:
   float Yaw() const;
   P3D operator-(const P3D &p_other) const;
   P3D operator+(const P3D &p_other) const;
-  P3D operator*(const float scalar);
-  P3D operator/(const float scalar);
+  P3D operator*(const float p_scalar);
+  P3D operator/(const float p_scalar);
   void operator=(const P3D &p_other);
   bool operator==(const P3D &p_other) const;
   void operator+=(const P3D &p_other);
   void operator-=(const P3D &p_other);
-  void operator*=(const float scalar);
-  void operator/=(const float scalar);
+  void operator*=(const float p_scalar);
+  void operator/=(const float p_scalar);
 };
 class worldSpace : public P2D {
 public:
@@ -85,7 +85,7 @@ struct pass {
   int rightmotor;
   float lmm; // left motor multiplier
   float rmm;
-  float tmm = 1;
+  float tmm = 1;     // time multiplier, maintains distances
   float wheelradius; // distance from center to edge of wheel
   float wheelbase;   // distance from center of bot to wheel
   float &leftspeed;  // dont set, just read
@@ -99,7 +99,7 @@ struct pass {
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
         leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
 };
-float Deg(float); // rad to deg
+float Deg(float p_radians); // rad to deg
 /* IN: Radians
  * OUT: Degrees */
 float NormalizeAngle(float p_angle); // normalize angle to +- 180 deg
@@ -107,17 +107,18 @@ float NormalizeAngle(float p_angle); // normalize angle to +- 180 deg
  * OUT: Degrees
  * EG: NormalizeAngle(361) == -179
  */
-float Rad(float); // deg to rad
+float Rad(float p_degrees); // deg to rad
 /* IN: Degrees
  * OUT: Radians */
-float lerp(pointpair, float); // interpolate from point a to point b
+float lerp(pointpair p_conversion,
+           float p_x); // interpolate from point a to point b
 /* IN: pointpair (2 points), any,
  * OUT: point
  * EG: lerp(pointpair(P2D(0,0),P2D(1,2)),10) == 20
  * Good for unit conversions */
-BKND::P2D PointLerp(BKND::P2D, BKND::P2D,
-                    float); // lerp without pointpair syntax
-float Interpolate(float);   // smooth interpolation
+BKND::P2D PointLerp(BKND::P2D p_one, BKND::P2D p_two,
+                    float p_x); // lerp without pointpair syntax
+float Interpolate(float p_x);   // smooth interpolation
 /* IN: number from 0-1
  * OUT: smoother number from 0-1
  * 2nd derivative continuity
@@ -125,27 +126,28 @@ float Interpolate(float);   // smooth interpolation
  * EG: for (float i = 0; i <= 1;
  * i+=0.01){Tank.Speed(Interpolate(i),Interpolate(i),0.01);} */
 template <typename A, typename B, typename C>
-bool Clamp(A p_min, B p_val, C p_max) { // is b between a and c?
+inline bool Clamp(A p_min, B p_val, C p_max) { // is b between a and c?
   return (p_min < p_val && p_val < p_max);
 }
 
 template <typename A, typename B, typename C>
-bool MarginOfError(A p_inputa, B p_inputb, C p_range) { // is a within b+-c
+inline bool MarginOfError(A p_inputa, B p_inputb,
+                          C p_range) { // is a within b+-c
   float min = p_inputb - p_range;
   float max = p_inputb + p_range;
   return Clamp(min, p_inputa, max);
 }
-string PrettyTime(int); /*display milliseconds as min:sec.ms*/
+string PrettyTime(int p_milliseconds); /*display milliseconds as min:sec.ms*/
 
 namespace misc {
-void WaitForLight(int); // wait until a light turns on to do next move
+void WaitForLight(int p_port); // wait until a light turns on to do next move
 void Timer();    // starts a clock, updates a global variable, DOES NOT END
 void HandsOff(); // starts HandsOff sequence, dont touch the bot after this at
                  // competition
 
 namespace buttons {
-void Show(bool); // set visibility of buttons
-bool Visible();  // get visibility of buttons
+void Show(bool p_visibility); // set visibility of buttons
+bool Visible();               // get visibility of buttons
 namespace up {
 bool A(); // is "A" button not pressed
 bool B(); // im not repeating myself for all 6
@@ -176,30 +178,43 @@ bool Z();
 namespace pathFind {
 using pathfunc = std::function<BKND::P2D(
     float)>; // any function that takes a time value and returns a point
-pathfunc MakePath(
-    std::initializer_list<BKND::P2D>); // makes an n degree bezier curve
+pathfunc MakePath(std::initializer_list<BKND::P2D>
+                      p_pointlist); // makes an n degree bezier curve
 /* IN: point0,point1,..,pointN
  * OUT: pathfunc from 0-1
+ * EG: MakeSinglePath({P2D(0,0),P2D(0,1),P2D(1,1)});
  */
+pathfunc MakePath(std::initializer_list<std::initializer_list<BKND::P2D>>
+                      p_pointlistlist); // makes multiple n degree bezier
+                                        // curves, stitches them together
+                                        /* IN: point0,point1,..,pointN
+                                        * OUT: pathfunc from 0-1
+                                        * EG: MakeSinglePath({{P2D(0,0),P2D(0,1),P2D(1,1)},
+                                                             {P2D(1,1),P2D(2,1)},
+                                                             {P2D(2,1),P2D(0,0)}}); */
+pathfunc
+MakePath(std::initializer_list<pathfunc> p_pathlist); // stitch curves together
 void FollowPath(pathfunc p_path, float p_time,
-                pass p_vals); // follow the pathfunction given
+                pass p_vals); // follow the pathfunction given in p_time seconds
+float PathLength(pathfunc p_path, float p_start = 0, float p_end = 1);
 void Pathfind(float p_deltal, float p_deltar,
               pass p_vals); // where is the robot, determined by the left wheel
                             // and the right wheel's distances
-void Face(float, float, pass);     // face x degrees in y time
-void GoTo(BKND::P2D, float, pass); // goto a point in x time
-};                                 // namespace pathFind
+void Face(float p_angle, float p_time, pass p_vals); // face x degrees in y time
+void GoTo(BKND::P2D p_position, float p_time,
+          pass p_vals); // goto a point in x time
+};                      // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
 
 namespace digital {
-bool Value(int); // is port pressed?
+bool Value(int p_port); // is port pressed?
 };
 namespace analog {
-float Value(int); // value from 0 to 1 of port
-int Raw(int);     // value from 0 to 2047 of port
-};                // namespace analog
+float Value(int p_port); // value from 0 to 1 of port
+int Raw(int p_port);     // value from 0 to 2047 of port
+};                       // namespace analog
 namespace accel {
 BKND::P3D Raw();  // get raw accelerometer values
 void Calibrate(); // callibrate accelerometer
@@ -241,9 +256,10 @@ void Move(int p_port, float p_angle, float p_time,
 };                                 // namespace servos
 
 namespace motors {
-float GetLoad(pass);            // one day...
-void ClearMotorRotations(pass); // set motor position counter to 0
-void Velocity(pass); // get velocity of motors, put in thread, DOES NOT END
+float GetLoad(int p_port);             // TODO
+void ClearMotorRotations(pass p_vals); // set motor position counter to 0
+void Velocity(
+    pass p_vals); // get velocity of motors, put in thread, DOES NOT END
 
 void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
            pass p_vals);
@@ -273,7 +289,7 @@ class IMU : public P3D {
   P3D m_Velo;
   P3D m_Gyro;
   Thread m_Update;
-  void Update() {
+  void Update() { // TODO
     sensors::gyro::Calibrate();
     sensors::accel::Calibrate();
     P3D error;
@@ -302,24 +318,25 @@ inline BKND::pointpair Inverse(BKND::pointpair p) {
   return BKND::pointpair(BKND::P2D(p.first.m_Y, p.first.m_X),
                          BKND::P2D(p.second.m_Y, p.second.m_X));
 }
-extern long int G_CurrentMS;
-extern std::ofstream G_file;
-extern worldSpace G_Odometry;
+extern long int G_CurrentMS;  // ms elapsed since timer called
+extern std::ofstream G_file;  // log file
+extern worldSpace G_Odometry; // odometer from wheels
 extern IMU G_IMU;
 
-extern BKND::pointpair TTD;
-extern BKND::pointpair TTI;
-extern BKND::pointpair ITD;
-extern BKND::pointpair DTI;
-extern BKND::pointpair DTT;
-extern BKND::pointpair ITT;
-extern BKND::pointpair TPSTP;
-extern BKND::pointpair PTTPS;
+extern BKND::pointpair TTD;   // ticks to degrees unit conversion
+extern BKND::pointpair TTI;   // ticks to inches
+extern BKND::pointpair ITD;   // inches to degrees
+extern BKND::pointpair DTI;   // degrees to inches
+extern BKND::pointpair DTT;   // degrees to ticks
+extern BKND::pointpair ITT;   // inches to ticks
+extern BKND::pointpair TPSTP; // ticks per second to percentspeed
+extern BKND::pointpair PTTPS; // percentspeed to ticks per second
 
-template <typename T> inline void logVariable(string name, T val) {
+template <typename T>
+inline void logVariable(string name, T val) { // TODO: Log variables macro
   std::cout << "    " << name << "=" << val << ";" << std::endl;
 }
-#define DBUG                                                                   \
+#define DBUG /* Debug info*/                                                   \
   BKND::G_file << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
                << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND
