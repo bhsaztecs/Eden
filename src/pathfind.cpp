@@ -72,10 +72,19 @@ pathfunc MakePath(initlist<BKND::P2D> p_points) {
 pathfunc MakePath(initlist<pathfunc> p_funcs) {
   vector<pathfunc> funcs(p_funcs);
   return [funcs](float t) -> BKND::P2D {
-    // scale t down by funcs.len(), run func(t % funcs.len())
-    return funcs[floorf(((t - std::numeric_limits<float>::epsilon()) *
-                         funcs.size()) /* rounds up if t = 1 */)](
-        fmod(t * funcs.size(), funcs.size()));
+    int index = 0;
+    if (t == 1) {
+      index = 1 - std::numeric_limits<float>::epsilon();
+    } else {
+      index = floor(t * funcs.size());
+    }
+    float value = 0;
+    if (t == 1) {
+      value = 1;
+    } else {
+      value = fmod(t * funcs.size(), 1);
+    }
+    return funcs[index](value);
   };
 }
 pathfunc MakePath(initlist<initlist<BKND::P2D>> p_points) {
@@ -85,9 +94,19 @@ pathfunc MakePath(initlist<initlist<BKND::P2D>> p_points) {
     funcs.push_back(MakePath(pointset));
   }
   return [funcs](float t) -> BKND::P2D {
-    // scale t down by funcs.len(), run func(t % funcs.len())
-    return funcs[roundf(t * funcs.size())](
-        fmod(t * funcs.size(), funcs.size()));
+    int index = 0;
+    if (t == 1) {
+      index = 1 - std::numeric_limits<float>::epsilon();
+    } else {
+      index = floor(t * funcs.size());
+    }
+    float value = 0;
+    if (t == 1) {
+      value = 1;
+    } else {
+      value = fmod(t * funcs.size(), 1);
+    }
+    return funcs[index](value);
   };
 }
 } // namespace pathFind
