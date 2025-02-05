@@ -109,5 +109,42 @@ pathfunc MakePath(initlist<initlist<BKND::P2D>> p_points) {
     return funcs[index](value);
   };
 }
+std::array<float, 3> PointsToCircle(std::array<BKND::P2D, 3> p_points) {
+  float x = ((p_points[1].m_Y - p_points[0].m_Y) *
+                 (p_points[0].m_Y - p_points[2].m_Y) *
+                 (p_points[2].m_Y - p_points[1].m_Y) -
+             (p_points[2].m_X - p_points[0].m_X) *
+                 (p_points[2].m_X + p_points[0].m_X) *
+                 (p_points[1].m_Y - p_points[0].m_Y) +
+             (p_points[0].m_X - p_points[1].m_X) *
+                 (p_points[0].m_X + p_points[1].m_X) *
+                 (p_points[0].m_Y - p_points[2].m_Y)) /
+            (2 * ((p_points[0].m_X - p_points[1].m_X) *
+                      (p_points[0].m_Y - p_points[2].m_Y) -
+                  (p_points[2].m_X - p_points[0].m_X) *
+                      (p_points[1].m_Y - p_points[0].m_Y)));
+  float y = ((p_points[2].m_Y + p_points[0].m_Y) *
+                 (p_points[0].m_Y - p_points[2].m_Y) *
+                 (p_points[1].m_X - p_points[0].m_X) +
+             (p_points[2].m_X - p_points[1].m_X) *
+                 (p_points[0].m_X - p_points[2].m_X) *
+                 (p_points[1].m_X - p_points[0].m_X) -
+             (p_points[0].m_Y + p_points[1].m_Y) *
+                 (p_points[1].m_Y - p_points[0].m_Y) *
+                 (p_points[0].m_X - p_points[2].m_X)) /
+            (2 * ((p_points[1].m_X - p_points[0].m_X) *
+                      (p_points[0].m_Y - p_points[2].m_Y) -
+                  (p_points[0].m_X - p_points[2].m_X) *
+                      (p_points[1].m_Y - p_points[0].m_Y)));
+  float r = sqrtf(powf(x - p_points[0].m_X, 2) + powf(y - p_points[0].m_Y, 2));
+  std::array<float, 3> result = {x, y, r};
+  return result;
+}
+void FollowCircle(float p_radius, float p_theta, float p_time, pass p_vals) {
+  float length = p_radius * p_theta;
+  float l = length + (p_theta * p_vals.wheelbase);
+  float r = length - (p_theta * p_vals.wheelbase);
+  motors::Distance(l, r, p_time, p_vals);
+}
 } // namespace pathFind
 } // namespace BKND

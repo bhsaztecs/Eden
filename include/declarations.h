@@ -93,7 +93,7 @@ struct pass {
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -197,7 +197,13 @@ void Pathfind(float p_deltal, float p_deltar,
 void Face(float p_angle, float p_time, pass p_vals); // face x degrees in y time
 void GoTo(BKND::P2D p_position, float p_time,
           pass p_vals); // goto a point in x time
-};                      // namespace pathFind
+std::array<float, 3> PointsToCircle(
+    std::array<BKND::P2D, 3>
+        p_points); // convert any 3 points into a circle, return [x,y,radius]
+void FollowCircle(float p_radius, float p_theta, float p_time,
+                  pass p_vals); // follow a radius for theta degrees. -to the
+                                // left, +to the right
+}; // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -208,7 +214,7 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-};                       // namespace analog
+}; // namespace analog
 namespace accel {
 BKND::P3D Raw();  // get raw accelerometer values
 void Calibrate(); // callibrate accelerometer
@@ -225,7 +231,7 @@ float Magnitude();
 float Pitch();
 float Yaw();
 void Update();
-};              // namespace gyro
+}; // namespace gyro
 namespace mag { // TODO
 void Calibrate();
 float Magnitude();
@@ -236,8 +242,8 @@ void Update();
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-};               // namespace battery
-};               // namespace sensors
+}; // namespace battery
+}; // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -247,7 +253,7 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-};                                 // namespace servos
+}; // namespace servos
 
 namespace motors {
 float GetLoad(int p_port);             // TODO
