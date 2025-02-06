@@ -3,6 +3,7 @@
 #include <functional>
 #include <initializer_list>
 #include <iostream>
+#include <kipr/accel/accel.h>
 #include <kipr/kipr.h>
 #include <limits>
 #include <thread>
@@ -288,24 +289,29 @@ public:
 class IMU : public P3D {
   P3D m_Velo;
   P3D m_Gyro;
+  P3D m_GyroBias;
+  P3D m_VeloBias;
+  P3D m_GlobAccel;
   Thread m_Update;
   void Update() { // TODO
-    sensors::gyro::Calibrate();
-    sensors::accel::Calibrate();
-    P3D error;
-    P3D adjusted;
-    while (1) {
-      float g = 1527.191202;
-      m_Velo += ((sensors::accel::Raw() + P3D(-1016.325833, -0.050633, g)) *
-                 (386.08858267717 /*i/s^2*/ / g)) /
-                10;
-      adjusted = m_Velo + error;
-      m_Gyro += sensors::gyro::Raw() * (3.0 / 245.0);
-      msleep(100);
-
-      m_Pitch = m_Gyro.m_X;
-      m_Yaw = -m_Gyro.m_Z;
-    }
+    m_Velo += BKND::sensors::accel::Raw() - m_VeloBias;
+    m_Gyro += BKND::sensors::gyro::Raw() - m_GyroBias;
+    msleep(10);
+    float cr = cos(m_Gyro.m_Y);
+    float sr = sin(m_Gyro.m_Y);
+    float cp = cos(m_Gyro.m_X);
+    float sp = sin(m_Gyro.m_X);
+    float cy = cos(m_Gyro.m_Z);
+    float sy = sin(m_Gyro.m_X);
+    float x = (cy * cp) * m_Velo.m_X + (cy * sp * sr - sy * cr) * m_Velo.m_Y +
+              (cy * sp * cr + sy * sr) * m_Velo.m_Z;
+    float y = (sy * cp) * m_Velo.m_X + (sy * sp * sr + cy * cr) * m_Velo.m_Y +
+              (sy * sp * cr - cy * sr) * m_Velo.m_Z;
+    float z =
+        (-sp) * m_Velo.m_X + (cp * sr) * m_Velo.m_Y + (cp * cr) * m_Velo.m_Z;
+    m_X += x;
+    m_Y += y;
+    m_Z += z;
   }
 
 public:
@@ -313,6 +319,47 @@ public:
   IMU(float p_x, float p_y, float p_z, float p_pitch, float p_yaw)
       : P3D(p_x, p_y, p_z), m_Update([this]() { Update(); }), m_Pitch(p_pitch),
         m_Yaw(p_yaw) {}
+  void Calibrate(int p_polls = 30) {
+    /*
+       V
+       |
+    O|---|O
+     |___|
+    */
+    for (int i = 0; i < p_polls; i++) {              // normal
+      m_GlobAccel.m_X += (float)accel_x() / p_polls; // left
+      m_GlobAccel.m_Y += (float)accel_y() / p_polls; // front
+      m_GlobAccel.m_Z += (float)accel_z() / p_polls; // up
+      msleep(10);
+    }
+    /*
+     \/
+     |
+    (O)
+    |_|
+    */
+    for (int i = 0; i < p_polls; i++) {              // on right
+      m_GlobAccel.m_X += (float)accel_z() / p_polls; // left
+      m_GlobAccel.m_Y += (float)accel_y() / p_polls; // front
+      m_GlobAccel.m_Z += (float)accel_x() / p_polls; // up
+      msleep(10);
+    }
+    /*
+       v
+    O|='=|O
+    */
+    for (int i = 0; i < p_polls; i++) {              // on back
+      m_GlobAccel.m_X += (float)accel_x() / p_polls; // left
+      m_GlobAccel.m_Y += (float)accel_z() / p_polls; // front
+      m_GlobAccel.m_Z += (float)accel_y() / p_polls; // up
+      msleep(10);
+    }
+    for (int i = 0; i < p_polls; i++) {
+      m_VeloBias += m_GlobAccel - (BKND::sensors::accel::Raw() / p_polls);
+      m_GyroBias += BKND::sensors::accel::Raw() / p_polls;
+      msleep(10);
+    }
+  }
 };
 inline BKND::pointpair Inverse(BKND::pointpair p) {
   return BKND::pointpair(BKND::P2D(p.first.m_Y, p.first.m_X),
