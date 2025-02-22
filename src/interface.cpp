@@ -27,7 +27,6 @@ Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
   DBUG;
   NormalizeMultipliers(p_leftmultiplier, p_rightmultiplier);
   Clear();
-  BKND::Thread VELOCITY([this]() { this->Velocity(); });
 }
 void Motors::Clear() {
   DBUG;
@@ -110,6 +109,7 @@ void Servos::MotorSet(int p_port, int p_ticks) {
   msleep(100);
   bmd(p_port);
   off(p_port);
+  msleep(1000);
 }
 
 Sensors<BKND::sensors::type::Analog>::Sensors(int p_port) : m_Port(p_port) {

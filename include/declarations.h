@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <fstream>
 #include <functional>
 #include <initializer_list>
@@ -8,17 +9,17 @@
 #include <thread>
 #include <vector>
 using std::string;
-using std::vector; // IGNORE CLANG
 template <typename T> using initlist = std::initializer_list<T>;
 
 namespace BKND { // backend
+extern bool G_ProgramRunning;
 
 class Thread; // threading functionality (run multiple things at once)
 class P2D;    // 2d point
-using pointpair = std::pair<BKND::P2D, BKND::P2D>; // pair of points
-class P3D;                                         // 3d point
-class worldSpace; // 2d point with collision functionality
-class IMU;        // innertial measurement unit (accelerometer, gyroscope)
+using pointpair = std::pair<P2D, P2D>; // pair of points
+class P3D;                             // 3d point
+class worldSpace;                      // 2d point with collision functionality
+class IMU; // innertial measurement unit (accelerometer, gyroscope)
 class P2D {
 public:
   float m_X;
@@ -93,7 +94,7 @@ struct pass {
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -113,9 +114,9 @@ float UnitConvert(pointpair p_conversion,
  * OUT: point
  * EG: lerp(pointpair(P2D(0,0),P2D(1,2)),10) == 20
  * Good for unit conversions */
-BKND::P2D PointLerp(BKND::P2D p_one, BKND::P2D p_two,
-                    float p_x); // lerp without pointpair syntax
-float Interpolate(float p_x);   // smooth interpolation
+P2D PointLerp(P2D p_one, P2D p_two,
+              float p_x);     // lerp without pointpair syntax
+float Interpolate(float p_x); // smooth interpolation
 /* IN: number from 0-1
  * OUT: smoother number from 0-1
  * 2nd derivative continuity
@@ -171,17 +172,16 @@ bool Z();
 }; // namespace misc
 
 namespace pathFind {
-using pathfunc = std::function<BKND::P2D(
-    float)>; // any function that takes a time value and returns a point
-pathfunc
-MakePath(initlist<BKND::P2D> p_pointlist); // makes an n degree bezier curve
+using pathfunc = std::function<P2D(float)>;   // any function that takes a time
+                                              // value and returns a point
+pathfunc MakePath(initlist<P2D> p_pointlist); // makes an n degree bezier curve
 /* IN: point0,point1,..,pointN
  * OUT: pathfunc from 0-1
  * EG: MakeSinglePath({P2D(0,0),P2D(0,1),P2D(1,1)});
  */
-pathfunc MakePath(initlist<initlist<BKND::P2D>>
-                      p_pointlistlist); // makes multiple n degree bezier
-                                        // curves, stitches them together
+pathfunc MakePath(
+    initlist<initlist<P2D>> p_pointlistlist); // makes multiple n degree bezier
+                                              // curves, stitches them together
 /* IN: point0,point1,..,pointN
 * OUT: pathfunc from 0-1
 * EG: MakeSinglePath({{P2D(0,0),P2D(0,1),P2D(1,1)},
@@ -195,15 +195,15 @@ void Pathfind(float p_deltal, float p_deltar,
               pass p_vals); // where is the robot, determined by the left wheel
                             // and the right wheel's distances
 void Face(float p_angle, float p_time, pass p_vals); // face x degrees in y time
-void GoTo(BKND::P2D p_position, float p_time,
+void GoTo(P2D p_position, float p_time,
           pass p_vals); // goto a point in x time
-std::array<float, 3> PointsToCircle(
-    std::array<BKND::P2D, 3>
-        p_points); // convert any 3 points into a circle, return [x,y,radius]
+std::array<float, 3>
+PointsToCircle(std::array<P2D, 3> p_points); // convert any 3 points into a
+                                             // circle, return [x,y,radius]
 void FollowCircle(float p_radius, float p_theta, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right
-}; // namespace pathFind
+};                              // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -214,9 +214,9 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-}; // namespace analog
+};                       // namespace analog
 namespace accel {
-BKND::P3D Raw();  // get raw accelerometer values
+P3D Raw();        // get raw accelerometer values
 void Calibrate(); // callibrate accelerometer
 float Magnitude();
 float Pitch();
@@ -225,25 +225,18 @@ void Update();
 
 }; // namespace accel
 namespace gyro {
-BKND::P3D Raw();
+P3D Raw();
 void Calibrate();
 float Magnitude();
 float Pitch();
 float Yaw();
 void Update();
 }; // namespace gyro
-namespace mag { // TODO
-void Calibrate();
-float Magnitude();
-float Pitch();
-float Yaw();
-void Update();
-}; // namespace mag
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-}; // namespace battery
-}; // namespace sensors
+};               // namespace battery
+};               // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -253,10 +246,9 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-}; // namespace servos
+};                                 // namespace servos
 
 namespace motors {
-float GetLoad(int p_port);             // TODO
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
 void Velocity(
     pass p_vals); // get velocity of motors, put in thread, DOES NOT END
@@ -280,63 +272,54 @@ public:
   Thread(Func &&p_func, Args &&...args)
       : m_Thread(std::forward<Func>(p_func), std::forward<Args>(args)...) {
   } // take a lambda and run it
-  /* EG: Thread time([](){BKND::Timer();}); time.Run(); */
-  void Run() { m_Thread.detach(); }
-  void Kill() { m_Thread.join(); }
+  /* EG: Thread time([](){Timer();}); */
+  void Detach() { m_Thread.detach(); }
+  void TryEnd() {
+    if (m_Thread.joinable()) {
+      m_Thread.join();
+    }
+  }
+  void BlockEnd() {
+    while (G_ProgramRunning) {
+      TryEnd();
+      msleep(100);
+    }
+  }
 };
 
 class IMU : public P3D {
-  P3D m_Velo;
-  P3D m_Gyro;
-  Thread m_Update;
-  void Update() { // TODO
-    sensors::gyro::Calibrate();
-    sensors::accel::Calibrate();
-    P3D error;
-    P3D adjusted;
-    while (1) {
-      float g = 1527.191202;
-      m_Velo += ((sensors::accel::Raw() + P3D(-1016.325833, -0.050633, g)) *
-                 (386.08858267717 /*i/s^2*/ / g)) /
-                10;
-      adjusted = m_Velo + error;
-      m_Gyro += sensors::gyro::Raw() * (3.0 / 245.0);
-      msleep(100);
-
-      m_Pitch = m_Gyro.m_X;
-      m_Yaw = -m_Gyro.m_Z;
-    }
-  }
+  const int delay = 10;
 
 public:
-  float m_Pitch, m_Yaw;
+  P3D m_Velo;
+  P3D m_Gyro;
+  P3D m_GyroBias;
+  P3D m_VeloBias;
+  Thread m_Update;
+  P3D Rotate(P3D p_position, P3D p_angle);
+  void Update();
   IMU(float p_x, float p_y, float p_z, float p_pitch, float p_yaw)
-      : P3D(p_x, p_y, p_z), m_Update([this]() { Update(); }), m_Pitch(p_pitch),
-        m_Yaw(p_yaw) {}
+      : P3D(p_x, p_y, p_z), m_Update([this]() { Update(); }) {}
+  void Calibrate(int p_polls = 60);
 };
-inline BKND::pointpair Inverse(BKND::pointpair p) {
-  return BKND::pointpair(BKND::P2D(p.first.m_Y, p.first.m_X),
-                         BKND::P2D(p.second.m_Y, p.second.m_X));
+inline pointpair Inverse(pointpair p) {
+  return pointpair(P2D(p.first.m_Y, p.first.m_X),
+                   P2D(p.second.m_Y, p.second.m_X));
 }
 extern long int G_CurrentMS;  // ms elapsed since timer called
-extern std::ofstream G_file;  // log file
+extern std::ofstream G_File;  // log file
 extern worldSpace G_Odometry; // odometer from wheels
-extern IMU G_IMU;
+// extern IMU G_IMU;
+extern pointpair TTD;   // ticks to degrees unit conversion
+extern pointpair TTI;   // ticks to inches
+extern pointpair ITD;   // inches to degrees
+extern pointpair DTI;   // degrees to inches
+extern pointpair DTT;   // degrees to ticks
+extern pointpair ITT;   // inches to ticks
+extern pointpair TPSTP; // ticks per second to percentspeed
+extern pointpair PTTPS; // percentspeed to ticks per second
 
-extern BKND::pointpair TTD;   // ticks to degrees unit conversion
-extern BKND::pointpair TTI;   // ticks to inches
-extern BKND::pointpair ITD;   // inches to degrees
-extern BKND::pointpair DTI;   // degrees to inches
-extern BKND::pointpair DTT;   // degrees to ticks
-extern BKND::pointpair ITT;   // inches to ticks
-extern BKND::pointpair TPSTP; // ticks per second to percentspeed
-extern BKND::pointpair PTTPS; // percentspeed to ticks per second
-
-template <typename T>
-inline void logVariable(string name, T val) { // TODO: Log variables macro
-  std::cout << "    " << name << "=" << val << ";" << std::endl;
-}
 #define DBUG /* Debug info*/                                                   \
-  BKND::G_file << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
-               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
+  G_File << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__ << " @ " \
+         << PrettyTime(G_CurrentMS) << std::endl
 } // namespace BKND

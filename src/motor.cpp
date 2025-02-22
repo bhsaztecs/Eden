@@ -2,7 +2,6 @@
 #include <cmath>
 namespace BKND {
 namespace motors {
-float GetLoad(pass p_vals) { return NAN; }
 void ClearMotorRotations(pass p_vals) {
   DBUG;
   cmpc(p_vals.leftmotor);
@@ -10,7 +9,7 @@ void ClearMotorRotations(pass p_vals) {
 }
 void Velocity(pass p_vals) {
   DBUG;
-  while (true) {
+  while (G_ProgramRunning) {
     float leftposition1 = gmpc(p_vals.leftmotor);
     float rightposition1 = gmpc(p_vals.rightmotor);
     msleep(100);

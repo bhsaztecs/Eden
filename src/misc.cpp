@@ -82,7 +82,7 @@ void WaitForLight(int p_port) {
 }
 void Timer() {
   DBUG;
-  while (true) {
+  while (G_ProgramRunning) {
     msleep(1);
     BKND::G_CurrentMS++;
   }
