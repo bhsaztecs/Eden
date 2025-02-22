@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <atomic>
 #include <fstream>
 #include <functional>
 #include <initializer_list>
@@ -8,12 +9,11 @@
 #include <limits>
 #include <thread>
 #include <vector>
-using std::string;
 template <typename T> using initlist = std::initializer_list<T>;
 
 namespace BKND { // backend
-extern bool G_ProgramRunning;
-
+extern std::atomic<bool> G_ProgramRunning, G_Colided;
+extern float G_ColisionLimit;
 class Thread; // threading functionality (run multiple things at once)
 class P2D;    // 2d point
 using pointpair = std::pair<P2D, P2D>; // pair of points
@@ -135,7 +135,8 @@ inline bool MarginOfError(A p_inputa, B p_inputb,
   float max = p_inputb + p_range;
   return Clamp(min, p_inputa, max);
 }
-string PrettyTime(int p_milliseconds); /*display milliseconds as min:sec.ms*/
+std::string
+PrettyTime(int p_milliseconds); /*display milliseconds as min:sec.ms*/
 
 namespace misc {
 void WaitForLight(int p_port); // wait until a light turns on to do next move
@@ -216,13 +217,13 @@ float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
 };                       // namespace analog
 namespace accel {
+void DetectCollision(pass p_read);
 P3D Raw();        // get raw accelerometer values
 void Calibrate(); // callibrate accelerometer
 float Magnitude();
 float Pitch();
 float Yaw();
 void Update();
-
 }; // namespace accel
 namespace gyro {
 P3D Raw();
@@ -247,7 +248,7 @@ void Change(int p_port, float p_angle,
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
 };                                 // namespace servos
-
+void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
 void Velocity(
@@ -309,6 +310,7 @@ inline pointpair Inverse(pointpair p) {
 extern long int G_CurrentMS;  // ms elapsed since timer called
 extern std::ofstream G_File;  // log file
 extern worldSpace G_Odometry; // odometer from wheels
+extern std::vector<worldSpace *> Obstacles;
 // extern IMU G_IMU;
 extern pointpair TTD;   // ticks to degrees unit conversion
 extern pointpair TTI;   // ticks to inches
@@ -320,6 +322,6 @@ extern pointpair TPSTP; // ticks per second to percentspeed
 extern pointpair PTTPS; // percentspeed to ticks per second
 
 #define DBUG /* Debug info*/                                                   \
-  G_File << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__ << " @ " \
-         << PrettyTime(G_CurrentMS) << std::endl
+  BKND::G_File << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
+               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND

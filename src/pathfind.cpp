@@ -51,7 +51,7 @@ float PathLength(pathfunc p_path, float p_start, float p_end) {
   return length;
 }
 pathfunc MakePath(initlist<BKND::P2D> p_points) {
-  vector<BKND::P2D> points(p_points);
+  std::vector<BKND::P2D> points(p_points);
   return [points](float t) -> BKND::P2D {
     int n = points.size() - 1;
     BKND::P2D result(0, 0);
@@ -70,7 +70,7 @@ pathfunc MakePath(initlist<BKND::P2D> p_points) {
   };
 }
 pathfunc MakePath(initlist<pathfunc> p_funcs) {
-  vector<pathfunc> funcs(p_funcs);
+  std::vector<pathfunc> funcs(p_funcs);
   return [funcs](float t) -> BKND::P2D {
     int index = 0;
     if (t == 1) {
@@ -88,8 +88,8 @@ pathfunc MakePath(initlist<pathfunc> p_funcs) {
   };
 }
 pathfunc MakePath(initlist<initlist<BKND::P2D>> p_points) {
-  vector<initlist<BKND::P2D>> points(p_points);
-  vector<pathfunc> funcs;
+  std::vector<initlist<BKND::P2D>> points(p_points);
+  std::vector<pathfunc> funcs;
   for (auto pointset : points) {
     funcs.push_back(MakePath(pointset));
   }

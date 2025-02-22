@@ -25,17 +25,26 @@ void Velocity(pass p_vals) {
 }
 void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
            pass p_vals) {
-
   float leftposition1 = BKND::UnitConvert(TTI, gmpc(p_vals.leftmotor));
   float rightposition1 = BKND::UnitConvert(TTI, gmpc(p_vals.rightmotor));
-  motor(p_vals.leftmotor, (p_leftpercent * p_vals.lmm));
-  motor(p_vals.rightmotor, (p_rightpercent * p_vals.rmm));
-  msleep((p_timeinseconds * 1000) * p_vals.tmm);
-  float leftposition2 = BKND::UnitConvert(TTI, gmpc(p_vals.leftmotor));
-  float rightposition2 = BKND::UnitConvert(TTI, gmpc(p_vals.rightmotor));
-  float leftdelta = leftposition2 - leftposition1;
-  float rightdelta = rightposition2 - rightposition1;
-  BKND::pathFind::Pathfind(leftdelta, rightdelta, p_vals);
+
+  float time = (p_timeinseconds * 1000) * p_vals.tmm;
+  int delay = 100; // 10hz = 100ms
+  for (int t = 0; t < time; t += delay) {
+    auto p1 = G_Odometry;
+    motor(p_vals.leftmotor, (p_leftpercent * p_vals.lmm));
+    motor(p_vals.rightmotor, (p_rightpercent * p_vals.rmm));
+    msleep(delay);
+    auto acceleration = (G_Odometry - p1) / delay;
+    if (acceleration.Magnitude() - sensors::accel::Raw().Magnitude() >
+        G_ColisionLimit) {
+      HandleColision(p_vals);
+    }
+  }
+
+  BKND::pathFind::Pathfind(
+      BKND::UnitConvert(TTI, gmpc(p_vals.leftmotor)) - leftposition1,
+      BKND::UnitConvert(TTI, gmpc(p_vals.rightmotor)) - rightposition1, p_vals);
 }
 void Distance(float p_leftinches, float p_rightinches, float p_timeinseconds,
               pass p_vals) {

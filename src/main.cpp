@@ -16,6 +16,12 @@ void cleanup() {
   G_ProgramRunning = false;
   G_File.close();
 }
+void HandleColision() {
+  G_Colided = true;
+  tank.Brake();
+  // blah blah blah
+  G_Colided = false;
+}
 int main() {
   std::atexit(cleanup);
   if (false /*tournament mode*/) {
