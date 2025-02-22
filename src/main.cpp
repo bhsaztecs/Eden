@@ -1,4 +1,5 @@
 #include "../include/interface.h"
+#include <cstdlib>
 using namespace BKND;
 Motors tank(3, 0, .97, 1, 3.5 / 2, 6.75 / 2);
 Servos arm(3, P2D(-45, 2050), P2D(0, 1500));
@@ -10,24 +11,21 @@ void Wait(float seconds) {
   tank.Brake();
   msleep(seconds * 1000);
 }
-void printnav() {
-  std::cout << "(" << G_Odometry.m_X << ", " << G_Odometry.m_Y << ")"
-            << std::endl
-            << std::endl;
+void cleanup() {
+  ao();
+  G_ProgramRunning = false;
+  G_File.close();
 }
 int main() {
-  Thread TIMER([]() { misc::Timer(); });
+  std::atexit(cleanup);
   if (false /*tournament mode*/) {
     misc::WaitForLight(startlight.m_Port);
     shut_down_in(119);
   }
-  TIMER.Run();
   pathFind::pathfunc func =
       pathFind::MakePath({P2D(0, 0), P2D(0, 10), P2D(10, 10)});
   nav.GoTo(func(0), 1);            // reach point first
   nav.GoTo(func(0.001), .5);       // reach angle
   nav.FollowPath(func, 10, 0.002); // follow path
-  ao();
-  G_file.close();
   return 0;
 }
