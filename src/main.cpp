@@ -49,7 +49,7 @@ int main() {
   Connection<ConData> con("192.168.1.30", true);
   con.Connect();
   con.Send(ConData());
-  ConData otherdata(con.Recieve());
+  ConData otherdata = con.m_Recieved.back();
 
   return 0;
 }

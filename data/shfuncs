@@ -19,7 +19,7 @@ compile() {
 	fi
 	echo "Compiling...";
     if wombatcompile; then
-        if [[ "$2" != "-nocopy" ]]; then
+        if [[ "$1" != "-nocopy" ]]; then
             if copy "$1"; then
                 echo -n "Succeeded at: "
             else
