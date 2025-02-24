@@ -1,3 +1,5 @@
+Collision Interupt
+	collision interupt calls function pointer that can be redefined?
 Follow path nicely (paper)
 	get path
 	turn path into circle sequence
