@@ -1,25 +1,36 @@
 #include "../include/declarations.h"
 namespace BKND {
 Thread TIMER([]() { misc::Timer(); });
-bool G_ProgramRunning = true;
 pointpair TTD(P2D(0, 0), P2D(1900, 360));
-pointpair DTT(P2D(0, 0), P2D(360, 1900));
+pointpair DTT(Inverse(TTD));
 
 pointpair ITD(P2D(0, 0), P2D(1, 41.379));
-pointpair DTI(P2D(0, 0), P2D(41.379, 1));
+pointpair DTI(Inverse(ITD));
 
 pointpair TTI(P2D(0, 0), P2D(436.782, 2));
-pointpair ITT(P2D(0, 0), P2D(1.57, 436.782));
+pointpair ITT(Inverse(TTI));
 
 pointpair PTTPS(P2D(0, 0), P2D(100, 1386));
-pointpair TPSTP(P2D(0, 0), P2D(1386, 100));
+pointpair TPSTP(Inverse(PTTPS));
 
+std::atomic<bool> G_ProgramRunning = {true};
+float G_ColisionLimit = .1;
+std::atomic<bool> G_Colided = false;
+void (*G_CollisionHandler)(pass) = nullptr;
 long int G_CurrentMS = 0;
 std::ofstream G_File("data/log.txt");
 std::vector<worldSpace *> G_Obstacles;
 worldSpace G_Odometry(0, 0, 0, 0);
 IMU G_IMU(0, 0, 0, 0, 0);
-string PrettyTime(int p_ms) {
+void HandleColision(pass p_vals) {
+  G_Colided = true;
+  if (G_CollisionHandler != nullptr) {
+    G_CollisionHandler(p_vals);
+  } else {
+    ao();
+  }
+}
+std::string PrettyTime(int p_ms) {
   int min;
   int sec;
   int totalms = p_ms;

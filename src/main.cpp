@@ -1,5 +1,4 @@
 #include "../include/interface.h"
-#include <cstdlib>
 using namespace BKND;
 Motors tank(3, 0, .97, 1, 3.5 / 2, 6.75 / 2);
 Servos arm(3, P2D(-45, 2050), P2D(0, 1500));
@@ -16,7 +15,12 @@ void cleanup() {
   G_ProgramRunning = false;
   G_File.close();
 }
+void MyColisionHandler(pass p_vals) {
+  motors::Brake(p_vals);
+  G_Colided = false;
+}
 int main() {
+  G_CollisionHandler = MyColisionHandler;
   std::atexit(cleanup);
   if (false /*tournament mode*/) {
     misc::WaitForLight(startlight.m_Port);

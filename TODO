@@ -1,10 +1,5 @@
-Interupt on collision
-	detect collision
-	interupt
-	find nearest wall
-	hit it
-	hit wall 90deg away
-	youre guaranteed to be in a known corner
+Collision Interupt
+	collision interupt calls function pointer that can be redefined?
 Follow path nicely (paper)
 	get path
 	turn path into circle sequence
