@@ -19,10 +19,14 @@ compile() {
 	fi
 	echo "Compiling...";
     if wombatcompile; then
-        if copy "$1"; then
-            echo -n "Succeeded at: "
+        if [[ "$2" != "-nocopy" ]]; then
+            if copy "$1"; then
+                echo -n "Succeeded at: "
+            else
+                echo -n "Copy failed at: "
+            fi
         else
-            echo -n "Copy failed at: "
+            echo -n "Compilation succeeded at: "
         fi
     else
         [ -d develop ] && rm -r develop

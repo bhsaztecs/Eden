@@ -1,13 +1,18 @@
 #pragma once
+#include <arpa/inet.h>
 #include <array>
 #include <atomic>
+#include <cerrno>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <kipr/kipr.h>
 #include <limits>
+#include <netinet/tcp.h>
 #include <thread>
+#include <unistd.h>
 #include <vector>
 template <typename T> using initlist = std::initializer_list<T>;
 
@@ -38,6 +43,10 @@ public:
   void operator*=(const float p_scalar);
   void operator/=(const float p_scalar);
 };
+inline pointpair Inverse(pointpair p) {
+  return pointpair(P2D(p.first.m_Y, p.first.m_X),
+                   P2D(p.second.m_Y, p.second.m_X));
+}
 class P3D {
 public:
   float m_X;
@@ -94,7 +103,7 @@ struct pass {
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -204,7 +213,7 @@ PointsToCircle(std::array<P2D, 3> p_points); // convert any 3 points into a
 void FollowCircle(float p_radius, float p_theta, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right
-}; // namespace pathFind
+};                              // namespace pathFind
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -215,7 +224,7 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-}; // namespace analog
+};                       // namespace analog
 namespace accel {
 void DetectCollision(pass p_read);
 P3D Raw();        // get raw accelerometer values
@@ -236,8 +245,8 @@ void Update();
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-}; // namespace battery
-}; // namespace sensors
+};               // namespace battery
+};               // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -247,7 +256,7 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-}; // namespace servos
+};                                 // namespace servos
 void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
@@ -304,10 +313,50 @@ public:
   void Calibrate(int p_polls = 60);
 };
 
-inline pointpair Inverse(pointpair p) {
-  return pointpair(P2D(p.first.m_Y, p.first.m_X),
-                   P2D(p.second.m_Y, p.second.m_X));
+namespace IRoC {
+template <typename DATA> std::string Serialize(DATA p_data) {
+  std::string result;
+  result.resize(sizeof(DATA));
+  memcpy(&result[0], &p_data, sizeof(DATA));
+  return result;
 }
+template <typename DATA> DATA Deserialize(std::string p_serial) {
+  if (p_serial.size() < sizeof(DATA)) {
+    return DATA();
+  }
+  DATA d;
+  memcpy((void *)&d, p_serial.c_str(), sizeof(DATA));
+  return d;
+}
+int Connect(bool p_ishost, std::string p_targetip);
+void Send(int p_socket, std::string p_message);
+inline std::string Recieve(int p_socket, size_t p_size) {
+  char buffer[p_size];
+  memset(buffer, 0, sizeof(buffer));
+  struct timeval timeout;
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
+  setsockopt(p_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+  int readerror = recv(p_socket, &buffer, p_size, 0);
+  if (readerror < 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      std::cerr << "Timed out" << std::endl;
+      return "";
+    }
+    std::cerr << "Connection error on receive" << std::endl;
+    return "";
+  }
+  if (readerror == 0) {
+    std::cerr << "Peer closed connection" << std::endl;
+    return "";
+  }
+
+  std::string str(buffer, readerror);
+  return str;
+}
+} // namespace IRoC
+
 extern void (*G_CollisionHandler)(pass);
 extern long int G_CurrentMS;  // ms elapsed since timer called
 extern std::ofstream G_File;  // log file

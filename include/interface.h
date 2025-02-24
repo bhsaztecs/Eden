@@ -80,3 +80,35 @@ public:
   void FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
                   float p_start = 0, float p_end = 1);
 };
+template <typename DATA> class Connection {
+  std::string Serialize(DATA p_data) {
+    DBUG;
+    return BKND::IRoC::Serialize<DATA>(p_data);
+  }
+  DATA Deserialize(std::string p_serialdata) {
+    DBUG;
+    return BKND::IRoC::Deserialize<DATA>(p_serialdata);
+  }
+
+public:
+  std::string m_TargetIP;
+  int m_Socket;
+  bool m_IsHost;
+  Connection(std::string p_targetip, bool p_ishost) {
+    DBUG;
+    m_TargetIP = p_targetip;
+    m_IsHost = p_ishost;
+  }
+  int Connect() {
+    DBUG;
+    return BKND::IRoC::Connect(m_IsHost, m_TargetIP);
+  }
+  void Send(DATA p_data) {
+    DBUG;
+    return BKND::IRoC::Send(m_Socket, Serialize(p_data));
+  }
+  DATA Recieve() {
+    DBUG;
+    return Deserialize(BKND::IRoC::Recieve(m_Socket, sizeof(DATA)));
+  }
+};
