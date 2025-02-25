@@ -95,7 +95,7 @@ template <typename DATA> class Connection {
     DBUG;
     std::string data = BKND::IRoC::Recieve(m_Socket, sizeof(DATA));
     if (m_Recieved.size() > 35) {
-      for (int i = 1; i < m_Recieved.size(); i++) {
+      for (uint i = 1; i < m_Recieved.size(); i++) {
         m_Recieved[i - 1] = m_Recieved[i];
       }
     }

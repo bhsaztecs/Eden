@@ -46,10 +46,17 @@ int main() {
   nav.GoTo(func(0), 1);            // reach point first
   nav.GoTo(func(0.001), .5);       // reach angle
   nav.FollowPath(func, 10, 0.002); // follow path
-  Connection<ConData> con("192.168.1.30", true);
+  Connection<ConData> con("192.168.1.30", false);
   con.Connect();
-  con.Send(ConData());
-  ConData otherdata = con.m_Recieved.back();
-
+  while (1) {
+    ConData tosend;
+    con.Send(tosend);
+    std::cout << "Recieved " << tosend.Position.Magnitude() << " "
+              << tosend.ElapsedMS << std::endl;
+    ConData otherdata = con.m_Recieved.back();
+    std::cout << "Recieved " << otherdata.Position.Magnitude() << " "
+              << otherdata.ElapsedMS << std::endl;
+    msleep(1000);
+  }
   return 0;
 }
