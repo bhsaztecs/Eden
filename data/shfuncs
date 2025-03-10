@@ -1,4 +1,23 @@
 #!/bin/sh
+wombatcompile() {
+	wombatcompile() {
+    mkdir -p develop
+    cp -r src include data LICENSE.txt project.manifest README.md develop/
+    mkdir -p develop/bin
+    mkdir -p bin
+
+    docker run -it --rm -v $(pwd)/develop:/root/develop:rw sillyfreak/wombat-cross /bin/sh -c ". /root/develop/data/shfuncs && aarch64-linux-gnu-g++ -std=c++17 -g -Iinclude/*.cpp -I /usr/local/include/include/ -Wall /root/develop/src/*.cpp -L/usr/local/lib -lkipr -lm -o /root/develop/bin/botball_user_program -lz -lpthread"
+
+    if [ -f develop/bin/botball_user_program ]; then
+        cp develop/bin/botball_user_program bin/
+        rm -rf develop
+        return 0
+    else
+        rm -rf develop
+        return 1
+    fi
+}
+}
 copy() {
     ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
     if scp -r -q * "kipr@192.168.125.1:~/Documents/KISS/$1"; then
@@ -19,10 +38,14 @@ compile() {
 	fi
 	echo "Compiling...";
     if wombatcompile; then
-        if copy "$1"; then
-            echo -n "Succeeded at: "
+        if [[ "$1" != "-nocopy" ]]; then
+            if copy "$1"; then
+                echo -n "Succeeded at: "
+            else
+                echo -n "Copy failed at: "
+            fi
         else
-            echo -n "Copy failed at: "
+            echo -n "Compilation succeeded at: "
         fi
     else
         [ -d develop ] && rm -r develop

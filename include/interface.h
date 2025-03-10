@@ -77,6 +77,59 @@ public:
   void GoTo(BKND::P2D p_goal, float p_time); // go to point in p_time
   void Face(float p_goal,
             float p_time); // face angle (in degrees) in p_time
-  void FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
-                  float p_start = 0, float p_end = 1);
+  void FollowPath(BKND::path::pathfunc p_path, float p_time, float p_start = 0,
+                  float p_end = 1);
+};
+template <typename DATA> class Connection {
+  std::string Serialize(DATA p_data) {
+    DBUG;
+    return BKND::IRoC::Serialize<DATA>(p_data);
+  }
+  DATA Deserialize(std::string p_serialdata) {
+    DBUG;
+    return BKND::IRoC::Deserialize<DATA>(p_serialdata);
+  }
+  BKND::Thread m_RecieveThread;
+  std::atomic<bool> m_Alive;
+  void Recieve() {
+    DBUG;
+    std::string data = BKND::IRoC::Recieve(m_Socket, sizeof(DATA));
+    if (m_Recieved.size() > 35) {
+      for (uint i = 1; i < m_Recieved.size(); i++) {
+        m_Recieved[i - 1] = m_Recieved[i];
+      }
+    }
+    if (!data.empty()) {
+      m_Recieved.push_back(Deserialize(data));
+    }
+  }
+
+public:
+  std::vector<DATA> m_Recieved;
+  std::string m_TargetIP;
+  int m_Socket;
+  bool m_IsHost;
+  Connection(std::string p_targetip, bool p_ishost)
+      : m_RecieveThread([this]() {
+          while (m_Alive) {
+            msleep(100);
+            Recieve();
+          }
+        }) {
+    DBUG;
+    m_TargetIP = p_targetip;
+    m_IsHost = p_ishost;
+  }
+  ~Connection() {
+    m_Alive = false;
+    msleep(200);
+  }
+  int Connect() {
+    DBUG;
+    return BKND::IRoC::Connect(m_IsHost, m_TargetIP);
+  }
+  void Send(DATA p_data) {
+    DBUG;
+    return BKND::IRoC::Send(m_Socket, Serialize(p_data));
+  }
 };
