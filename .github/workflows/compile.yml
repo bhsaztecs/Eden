@@ -1,0 +1,26 @@
+name: C++ Compilation Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Pull Docker image
+        run: docker pull sillyfreak/wombat-cross
+
+      - name: Run compile command
+        run: |
+          chmod +x ./data/shfuncs
+          source ./data/shfuncs
+          compile -nocopy
