@@ -16,6 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Create necessary directories
+        run: |
+          mkdir -p bin
+          chmod -R 755 .
+
       - name: Pull Docker image
         run: docker pull sillyfreak/wombat-cross
 

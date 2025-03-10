@@ -1,6 +1,22 @@
 #!/bin/sh
 wombatcompile() {
-	mkdir develop && sudo cp -r src include data bin LICENSE.txt project.manifest README.md develop/ && sudo docker run -it --rm -v $(pwd)/develop:/root/develop:rw sillyfreak/wombat-cross /bin/sh -c ". /root/develop/ data/shfuncs && aarch64-linux-gnu-g++ -std=c++17 -g -Iinclude/*.cpp -I /usr/local/include/include/ -Wall /root/develop/src/*.cpp -L/usr/local/lib -lkipr -lm -o /root/develop/bin/botball_user_program -lz -lpthread" && sudo cp develop/bin/botball_user_program bin/ && sudo rm -r develop/
+	wombatcompile() {
+    mkdir -p develop
+    cp -r src include data LICENSE.txt project.manifest README.md develop/
+    mkdir -p develop/bin
+    mkdir -p bin
+
+    docker run -it --rm -v $(pwd)/develop:/root/develop:rw sillyfreak/wombat-cross /bin/sh -c ". /root/develop/data/shfuncs && aarch64-linux-gnu-g++ -std=c++17 -g -Iinclude/*.cpp -I /usr/local/include/include/ -Wall /root/develop/src/*.cpp -L/usr/local/lib -lkipr -lm -o /root/develop/bin/botball_user_program -lz -lpthread"
+
+    if [ -f develop/bin/botball_user_program ]; then
+        cp develop/bin/botball_user_program bin/
+        rm -rf develop
+        return 0
+    else
+        rm -rf develop
+        return 1
+    fi
+}
 }
 copy() {
     ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
