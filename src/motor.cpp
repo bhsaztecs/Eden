@@ -42,7 +42,7 @@ void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
     }
   }
 
-  BKND::pathFind::Pathfind(
+  BKND::path::Pathfind(
       BKND::UnitConvert(TTI, gmpc(p_vals.leftmotor)) - leftposition1,
       BKND::UnitConvert(TTI, gmpc(p_vals.rightmotor)) - rightposition1, p_vals);
 }

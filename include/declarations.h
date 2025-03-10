@@ -103,7 +103,7 @@ struct pass {
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -181,7 +181,7 @@ bool Z();
 }; // namespace buttons
 }; // namespace misc
 
-namespace pathFind {
+namespace path {
 using pathfunc = std::function<P2D(float)>;   // any function that takes a time
                                               // value and returns a point
 pathfunc MakePath(initlist<P2D> p_pointlist); // makes an n degree bezier curve
@@ -213,7 +213,7 @@ PointsToCircle(std::array<P2D, 3> p_points); // convert any 3 points into a
 void FollowCircle(float p_radius, float p_theta, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right
-}; // namespace pathFind
+};                              // namespace path
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -224,7 +224,7 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-}; // namespace analog
+};                       // namespace analog
 namespace accel {
 void DetectCollision(pass p_read);
 P3D Raw();        // get raw accelerometer values
@@ -245,8 +245,8 @@ void Update();
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-}; // namespace battery
-}; // namespace sensors
+};               // namespace battery
+};               // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -256,7 +256,7 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-}; // namespace servos
+};                                 // namespace servos
 void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
@@ -362,7 +362,7 @@ extern long int G_CurrentMS;  // ms elapsed since timer called
 extern std::ofstream G_File;  // log file
 extern worldSpace G_Odometry; // odometer from wheels
 extern std::vector<worldSpace *> Obstacles;
-// extern IMU G_IMU;
+extern IMU G_IMU;
 extern pointpair TTD;   // ticks to degrees unit conversion
 extern pointpair TTI;   // ticks to inches
 extern pointpair ITD;   // inches to degrees

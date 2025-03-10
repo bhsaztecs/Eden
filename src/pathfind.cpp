@@ -3,7 +3,7 @@
 #include <limits>
 #include <math.h>
 namespace BKND {
-namespace pathFind {
+namespace path {
 void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
   DBUG;
   float theta = (p_deltar - p_deltal) / (2 * p_vals.wheelbase);
@@ -32,7 +32,7 @@ void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
       (delta.Magnitude() / (fabs(delta.Angle() / bias) + delta.Magnitude())) *
       p_time;
 
-  BKND::pathFind::Face(delta.Angle(), ftime, p_vals);
+  BKND::path::Face(delta.Angle(), ftime, p_vals);
   BKND::motors::Distance(delta.Magnitude(), delta.Magnitude(), dtime, p_vals);
 }
 void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
@@ -146,5 +146,5 @@ void FollowCircle(float p_radius, float p_theta, float p_time, pass p_vals) {
   float r = length - (p_theta * p_vals.wheelbase);
   motors::Distance(l, r, p_time, p_vals);
 }
-} // namespace pathFind
+} // namespace path
 } // namespace BKND

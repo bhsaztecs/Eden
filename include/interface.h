@@ -77,8 +77,8 @@ public:
   void GoTo(BKND::P2D p_goal, float p_time); // go to point in p_time
   void Face(float p_goal,
             float p_time); // face angle (in degrees) in p_time
-  void FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
-                  float p_start = 0, float p_end = 1);
+  void FollowPath(BKND::path::pathfunc p_path, float p_time, float p_start = 0,
+                  float p_end = 1);
 };
 template <typename DATA> class Connection {
   std::string Serialize(DATA p_data) {

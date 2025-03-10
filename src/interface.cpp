@@ -131,14 +131,14 @@ bool Sensors<BKND::sensors::type::Digital>::Value() {
 PathFind::PathFind(BKND::pass &motorstoread) : m_Read(motorstoread) { DBUG; }
 void PathFind::GoTo(BKND::P2D p_goal, float p_time) {
   DBUG;
-  BKND::pathFind::GoTo(p_goal, p_time, m_Read);
+  BKND::path::GoTo(p_goal, p_time, m_Read);
 }
 void PathFind::Face(float p_goal, float p_time) {
   DBUG;
-  BKND::pathFind::Face(p_goal, p_time, m_Read);
+  BKND::path::Face(p_goal, p_time, m_Read);
 }
-void PathFind::FollowPath(BKND::pathFind::pathfunc p_path, float p_time,
+void PathFind::FollowPath(BKND::path::pathfunc p_path, float p_time,
                           float p_start, float p_end) {
   DBUG;
-  BKND::pathFind::FollowPath(p_path, p_time, p_start, p_end, m_Read);
+  BKND::path::FollowPath(p_path, p_time, p_start, p_end, m_Read);
 }

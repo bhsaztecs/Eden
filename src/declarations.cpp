@@ -15,7 +15,7 @@ pointpair TPSTP(Inverse(PTTPS));
 
 std::atomic<bool> G_ProgramRunning = {true};
 float G_ColisionLimit = .1;
-std::atomic<bool> G_Colided = false;
+std::atomic<bool> G_Colided = {false};
 void (*G_CollisionHandler)(pass) = nullptr;
 long int G_CurrentMS = 0;
 std::ofstream G_File("data/log.txt");
