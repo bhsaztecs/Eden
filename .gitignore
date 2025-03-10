@@ -1,6 +1,6 @@
 # Ignore everything inside /code/kipr but not other content in /code
 /bin/*
-
+src/main.cpp
 # Prerequisites
 *.d
 
