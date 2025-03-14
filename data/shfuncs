@@ -1,34 +1,24 @@
 #!/bin/sh
-wombatcompile() {
-	wombatcompile() {
-    mkdir -p develop
-    cp -r src include data LICENSE.txt project.manifest README.md develop/
-    mkdir -p develop/bin
-    mkdir -p bin
-
-    docker run -it --rm -v $(pwd)/develop:/root/develop:rw sillyfreak/wombat-cross /bin/sh -c ". /root/develop/data/shfuncs && aarch64-linux-gnu-g++ -std=c++17 -g -Iinclude/*.cpp -I /usr/local/include/include/ -Wall /root/develop/src/*.cpp -L/usr/local/lib -lkipr -lm -o /root/develop/bin/botball_user_program -lz -lpthread"
-
-    if [ -f develop/bin/botball_user_program ]; then
-        cp develop/bin/botball_user_program bin/
-        rm -rf develop
-        return 0
-    else
-        rm -rf develop
-        return 1
-    fi
-}
+localcompile() {
+	sudo mkdir -p develop
+	sudo mkdir -p bin
+	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
+	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
+	aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lz -lpthread -lkipr -o ./bin/botball_user_program
+	sudo cp develop/bin/botball_user_program bin/
+	sudo rm -rf develop
 }
 copy() {
-    ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
-    if scp -r -q * "kipr@192.168.125.1:~/Documents/KISS/$1"; then
-        return 0;
-    else
+	ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
+	if scp -r -q * "kipr@192.168.125.1:~/Documents/KISS/$1"; then
+		return 0;
+	else
 	return 1;
-    fi
+	fi
 }
 
 shell() {
-    ssh kipr@192.168.125.1
+	ssh kipr@192.168.125.1
 }
 
 compile() {
@@ -37,19 +27,19 @@ compile() {
 		return 1;
 	fi
 	echo "Compiling...";
-    if wombatcompile; then
-        if [[ "$1" != "-nocopy" ]]; then
-            if copy "$1"; then
-                echo -n "Succeeded at: "
-            else
-                echo -n "Copy failed at: "
-            fi
-        else
-            echo -n "Compilation succeeded at: "
-        fi
-    else
-        [ -d develop ] && rm -r develop
-        echo -n "Compilation failed at: "
-    fi
-    date +"%r"
+	if wombatcompile; then
+		if [[ "$1" != "-nocopy" ]]; then
+			if copy "$1"; then
+				echo -n "Succeeded at: "
+			else
+				echo -n "Copy failed at: "
+			fi
+		else
+			echo -n "Compilation succeeded at: "
+		fi
+	else
+		[ -d develop ] && rm -r develop
+		echo -n "Compilation failed at: "
+	fi
+	date +"%r"
 }
