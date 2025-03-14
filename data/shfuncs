@@ -1,23 +1,21 @@
 #!/bin/sh
-compileexecutable(){
-	aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lz -lpthread -lkipr -o ./bin/botball_user_program
-}
-compilelibrary(){
-	aarch64-linux-gnu-g++ -std=c++17 -g -Wall -fPIC -shared \
-    -I./include/* -I/usr/local/include/include/ -L/usr/local/lib \
-    ./src/*.cpp -lm -lz -lpthread -lkipr -o ./bin/libeden.so
-}
-dockerwombat() {
+
+executable() {
 	sudo mkdir -p develop
 	sudo mkdir -p bin
 	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
-	if [[ "$1" == "lib" ]]; then
-		sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross sh -c ". ./data/shfuncs && compilelibrary"
-		sudo cp -r develop/bin/libeden.so bin/
-	else
-		sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross sh -c ". ./data/shfuncs && compileexecutable"
-		sudo cp -r develop/bin/botball_user_program bin/
-	fi
+	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
+		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
+	sudo cp ./develop/bin/botball_user_program bin/
+	sudo rm -rf develop
+}
+library() {
+	sudo mkdir -p develop
+	sudo mkdir -p bin
+	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
+	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
+		aarch64-linux-gnu-g++ -std=c++17 -g -fPIC -shared -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lpthread -lkipr -lz -o ./bin/libeden.so
+	sudo cp ./develop/bin/libeden.so bin/
 	sudo rm -rf develop
 }
 copy() {
@@ -34,14 +32,14 @@ shell() {
 }
 
 compile() {
-	if [ -z "$2" ]; then
+	if [ -z "$1" ]; then
 		echo "No destination specified.";
 		return 1;
 	fi
 	echo "Compiling...";
-	if dockerwombat "$1"; then
-		if [[ "$2" != "--nocopy" ]]; then
-			if copy "$2"; then
+	if "$2"; then
+		if [[ "$1" != "--nocopy" ]]; then
+			if copy "$1"; then
 				echo -n "Succeeded at: "
 			else
 				echo -n "Copy failed at: "

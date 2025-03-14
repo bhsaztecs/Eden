@@ -1,0 +1,6 @@
+Follow path nicely (paper)
+	get path
+	turn path into circle sequence
+	follow circles
+Test Everything
+Release V1.0.0

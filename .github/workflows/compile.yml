@@ -1,31 +1,37 @@
-name: C++ Compilation Check
+name: Compilation Check
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
 
-      - name: Create necessary directories
-        run: |
-          mkdir -p bin
-          chmod -R 755 .
+            - name: Create necessary directories
+              run: |
+                  mkdir -p bin
+                  chmod -R 755 .
 
-      - name: Pull Docker image
-        run: docker pull sillyfreak/wombat-cross
+            - name: Pull Docker image
+              run: docker pull sillyfreak/wombat-cross
 
-      - name: Run compile command
-        run: |
-          chmod +x ./data/shfuncs
-          source ./data/shfuncs
-          compile -nocopy
+            - name: Compile binary
+              run: |
+                  chmod +x ./data/shfuncs
+                  source ./data/shfuncs
+                  compile --nocopy executable
+
+            - name: Compile library
+              run: |
+                  chmod +x ./data/shfuncs
+                  source ./data/shfuncs
+                  compile --nocopy library
