@@ -1,5 +1,14 @@
 #!/bin/sh
-
+initialize() {
+	git init
+	git add .
+	git commit -m "preinitialize"
+	sudo mkdir -p bin
+	touch bin/botball_user_program
+	sudo docker pull sillyfreak/wombat-cross
+	touch src/main.cpp
+	cat example.cpp > main.cpp
+}
 executable() {
 	sudo mkdir -p develop
 	sudo mkdir -p bin

@@ -1,8 +1,6 @@
 #pragma once
 #include "declarations.h"
 class Motors {
-  void Velocity(); // update velocity reading of these motors every 10 ms.
-                   // DOES NOT END
   void
   NormalizeMultipliers(float p_leftmultiplier,
                        float p_rightmultiplier); // maxes out motor multipliers
@@ -11,7 +9,9 @@ class Motors {
    * maintains distances regardless of multipliers. */
 
 public:
-  BKND::pass m_Pass;               // bunch of data that functions need
+  void Velocity();   // update velocity reading of these motors every 10 ms.
+                     // DOES NOT END
+  BKND::pass m_Pass; // bunch of data that functions need
   float m_LeftSpeed, m_RightSpeed; // the speed that the left and right motors
                                    // are going. read, dont write.
 
