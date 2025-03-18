@@ -9,19 +9,17 @@ void ClearMotorRotations(pass p_vals) {
 }
 void Velocity(pass p_vals) {
   DBUG;
-  while (G_ProgramRunning) {
-    float leftposition1 = gmpc(p_vals.leftmotor);
-    float rightposition1 = gmpc(p_vals.rightmotor);
-    msleep(100);
-    float leftposition2 = gmpc(p_vals.leftmotor);
-    float rightposition2 = gmpc(p_vals.rightmotor);
+  float leftposition1 = gmpc(p_vals.leftmotor);
+  float rightposition1 = gmpc(p_vals.rightmotor);
+  msleep(100);
+  float leftposition2 = gmpc(p_vals.leftmotor);
+  float rightposition2 = gmpc(p_vals.rightmotor);
 
-    float leftvelocity = (leftposition2 - leftposition1) * 10; // tics per
-                                                               // second
-    float rightvelocity = (rightposition2 - rightposition1) * 10;
-    p_vals.leftspeed = leftvelocity * 0.06; // percent speed
-    p_vals.rightspeed = rightvelocity * 0.06;
-  }
+  float leftvelocity = (leftposition2 - leftposition1) * 10; // tics per
+                                                             // second
+  float rightvelocity = (rightposition2 - rightposition1) * 10;
+  p_vals.leftspeed = leftvelocity * 0.06; // percent speed
+  p_vals.rightspeed = rightvelocity * 0.06;
 }
 void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
            pass p_vals) {

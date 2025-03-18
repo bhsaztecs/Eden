@@ -1,6 +1,8 @@
 #pragma once
 #include "declarations.h"
 class Motors {
+  std::atomic<bool> m_Alive = {true};
+  BKND::Thread m_VelThread;
   void
   NormalizeMultipliers(float p_leftmultiplier,
                        float p_rightmultiplier); // maxes out motor multipliers
@@ -9,8 +11,7 @@ class Motors {
    * maintains distances regardless of multipliers. */
 
 public:
-  void Velocity();   // update velocity reading of these motors every 10 ms.
-                     // DOES NOT END
+  void Velocity();   // update velocity reading of these motors, takes 10 ms.
   BKND::pass m_Pass; // bunch of data that functions need
   float m_LeftSpeed, m_RightSpeed; // the speed that the left and right motors
                                    // are going. read, dont write.
