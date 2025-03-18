@@ -7,7 +7,7 @@ initialize() {
 	touch bin/botball_user_program
 	sudo docker pull sillyfreak/wombat-cross
 	touch src/main.cpp
-	cat example.cpp > main.cpp
+	cat data/example.cpp > src/main.cpp
 }
 executable() {
 	sudo mkdir -p develop
