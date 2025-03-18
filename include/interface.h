@@ -1,15 +1,6 @@
 #pragma once
 #include "declarations.h"
 class Motors {
-  std::atomic<bool> m_Alive = {true};
-  BKND::Thread m_VelThread;
-  void
-  NormalizeMultipliers(float p_leftmultiplier,
-                       float p_rightmultiplier); // maxes out motor multipliers
-  /* IN: left motor multiplier, right motor multiplier
-   * EG: NormalizeMultipliers(0.1,0.2) sets lmm & rmm to 0.5 & 1 and tmm to 2.
-   * maintains distances regardless of multipliers. */
-
 public:
   void Velocity();   // update velocity reading of these motors, takes 10 ms.
   BKND::pass m_Pass; // bunch of data that functions need
@@ -33,6 +24,16 @@ public:
                   float p_timeinseconds); // accelerate from current speed to
                                           // goal speed in this many seconds
   void Brake();
+
+private:
+  std::atomic<bool> m_Alive = {true};
+  BKND::Thread m_VelThread;
+  void
+  NormalizeMultipliers(float p_leftmultiplier,
+                       float p_rightmultiplier); // maxes out motor multipliers
+  /* IN: left motor multiplier, right motor multiplier
+   * EG: NormalizeMultipliers(0.1,0.2) sets lmm & rmm to 0.5 & 1 and tmm to 2.
+   * maintains distances regardless of multipliers. */
 };
 class Servos {
   static void MotorSet(int p_port,
