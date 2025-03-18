@@ -1,14 +1,22 @@
 #!/bin/sh
 initialize() {
-	git init
-	git add .
-	git commit -m "preinitialize"
+	echo "save before initialization? (y/n)"
+	read save
+	if [[ $save == "Y" || $save == "y" ]]; then
+		git init
+		git add .
+		git commit -m "pre-initialize"
+	elif [[ $save != "N" && $save != "n" ]]; then
+		echo "Invalid input"
+	fi
 	sudo mkdir -p bin
 	touch bin/botball_user_program
 	sudo docker pull sillyfreak/wombat-cross
 	touch src/main.cpp
 	cat data/example.cpp > src/main.cpp
+	echo "Run 'compile --nocopy executable' to validate."
 }
+
 executable() {
 	sudo mkdir -p develop
 	sudo mkdir -p bin

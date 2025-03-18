@@ -32,7 +32,6 @@ void MyColisionHandler(pass p_vals) {
 
 int main() {
   G_CollisionHandler = MyColisionHandler;
-  std::atexit(cleanup);
   if (false /*tournament mode*/) {
     misc::WaitForLight(startlight.m_Port);
     shut_down_in(119);
@@ -53,5 +52,7 @@ int main() {
   auto path = path::MakePath({G_Odometry, P2D(10, 10), P2D(0, 10)});
   // make bezier curve with points (current, (10,10),(0,10))
   nav.FollowPath(path, 10); // follow that path for 10 seconds
+
+  cleanup();
   return 0;
 }

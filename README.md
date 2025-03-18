@@ -4,36 +4,36 @@ See https://github.com/kipr/libwallaby
 
 Eden is licensed under GNU AGPL.
 
-src/main.cpp is both an example and a test.
+see data/example.cpp for example code
 
-to compile on a wombat: use
-```bash
-sudo g++ -std=c++17 -g \
--Iinclude/* -I" \
-/usr/local/include/include" \
--Wall src/*.cpp -L"/usr/local/lib" \
--lkipr -lm -o "bin/botball_user_program" \
--lz -lpthread
+## Installation:
+```sh
+git clone https://github.com/bhsaztecs/Eden
+cd Eden
+source data/shfuncs
+initialize
 ```
-to compile on ubuntu: use
-```bash
-aarch64-linux-gnu-g++ -Iinclude/* -I" \
-/usr/local/include/include" \
--Wall src/*.cpp -L"/usr/local/lib" \
--lkipr -lm -o "bin/botball_user_program" \
--lz -lpthread
+## Compiling
+```sh
+compile [destination folder] [target]
+# destination folder should be UserName/ProjectName,
+# the full path name on the robot would be
+# /home/kipr/Documents/KISS/UserName/ProjectName
+
+# target is either "executable" or "library" at the moment
+# target takes any function, but executable & library are
+# the only ones tested
 ```
-to compile using docker: use
-```bash
-mkdir develop
-sudo cp -r src include data bin LICENSE.txt project.manifest README.md develop/
-sudo docker run -it --rm -v $(pwd)/develop:/root/develop:rw sillyfreak/wombat-cross /bin/sh -c ". /root/develop/data/shfuncs && aarch64-linux-gnu-g++ -std=c++17 -g -Iinclude/* -I /usr/local/include/include -Wall /root/develop/src/*.cpp -L/usr/local/lib -lkipr -lm -o /root/develop/bin/botball_user_program -lz -lpthread"
-sudo cp develop/bin/botball_user_program bin/
-sudo rm -r develop/
-```
-then, copy the files to the wombat using
-```bash
-scp -r * kipr@192.168.125.1:~/Documents/KISS/[username]/[projectname]
-ssh kipr@192.168.125.1
-./bin/botball_user_program
+## Troubleshooting:
+
+### I'm not seeing my project in the IDE
+edit
+"/home/kipr/Documents/KISS/[UserName]/[ProjectName]/project.manifest"
+and "/home/kipr/Documents/KISS/(i forgot the path sorry)"
+
+### SCP refused to copy my files
+```sh
+shell
+cd /home/kipr/Documents/KISS/[UserName]/
+sudo chmod 777 -R *
 ```

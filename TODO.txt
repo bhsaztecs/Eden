@@ -1,6 +1,6 @@
 Follow path nicely (paper)
-	get path
+	get path DONE
 	turn path into circle sequence
-	follow circles
+	follow circles (testing needed)
 Test Everything
 Release V1.0.0
