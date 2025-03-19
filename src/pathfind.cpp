@@ -40,7 +40,7 @@ void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
                 pass p_vals) {
   float delta = 0.1;
 
-  for (int i = p_start; i < p_end; i += delta * 3) {
+  for (int i = p_start; i < p_end; i += delta * 2) {
     P2D start = p_path(i);
     P2D middle = p_path(i + delta);
     P2D end = p_path(i + delta * 2);
