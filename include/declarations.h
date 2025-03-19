@@ -260,8 +260,7 @@ void Move(int p_port, float p_angle, float p_time,
 void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
-void Velocity(
-    pass p_vals); // get velocity of motors, put in thread, DOES NOT END
+void Velocity(pass p_vals);            // update velocity of motors once
 
 void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
            pass p_vals);
