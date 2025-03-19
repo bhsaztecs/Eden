@@ -38,7 +38,7 @@ void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
 
 void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
                 pass p_vals) {
-  float delta = 0.1;
+  float delta = 0.01;
 
   for (int i = p_start; i < p_end; i += delta * 2) {
     P2D start = p_path(i);
