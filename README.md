@@ -15,6 +15,7 @@ initialize
 ```
 ## Compiling
 ```sh
+source data/shfunc
 compile [destination folder] [target]
 # destination folder should be UserName/ProjectName,
 # the full path name on the robot would be
@@ -33,6 +34,7 @@ and "/home/kipr/Documents/KISS/(i forgot the path sorry)"
 
 ### SCP refused to copy my files
 ```sh
+source data/shfuncs
 shell
 cd /home/kipr/Documents/KISS/[UserName]/
 sudo chmod 777 -R *
