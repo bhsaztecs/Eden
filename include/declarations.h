@@ -33,7 +33,8 @@ public:
   float Magnitude();
   float Angle(); // angle relative to (0,0) in degrees
   bool operator==(const P2D &p_other) const; // compare
-  P2D operator+(const P2D &p_other) const;   // translate
+  bool operator!=(const P2D &p_other) const;
+  P2D operator+(const P2D &p_other) const; // translate
   P2D operator-(const P2D &p_other) const;
   P2D operator*(const float p_scalar) const; // scale
   P2D operator/(const float p_scalar) const;
@@ -57,6 +58,7 @@ public:
   float Pitch();
   float Yaw();
   bool operator==(const P3D &p_other) const;
+  bool operator!=(const P3D &p_other) const;
   P3D operator+(const P3D &p_other) const;
   P3D operator-(const P3D &p_other) const;
   P3D operator*(const float p_scalar) const;
