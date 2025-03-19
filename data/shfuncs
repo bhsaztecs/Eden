@@ -16,7 +16,15 @@ initialize() {
 	cat data/example.cpp > src/main.cpp
 	echo "Run 'compile --nocopy executable' to validate."
 }
-
+indexe(){
+	sudo mkdir -p develop
+	sudo mkdir -p bin
+	sudo cp -r bin src include develop/
+	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
+		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -L./bin/ ./src/main.cpp -leden -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
+	sudo cp ./develop/bin/botball_user_program bin/
+	sudo rm -rf develop
+}
 executable() {
 	sudo mkdir -p develop
 	sudo mkdir -p bin

@@ -20,9 +20,9 @@ compile [destination folder] [target]
 # the full path name on the robot would be
 # /home/kipr/Documents/KISS/UserName/ProjectName
 
-# target is either "executable" or "library" at the moment
-# target takes any function, but executable & library are
-# the only ones tested
+# target is either "executable", "library", or "indexe" at
+# the moment target takes any function, but executable &
+# library are the only ones tested
 ```
 ## Troubleshooting:
 
