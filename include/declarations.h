@@ -213,8 +213,8 @@ std::array<float, 3>
 PointsToCircle(std::array<P2D, 3> p_points); // convert any 3 points into a
                                              // circle, return [x,y,radius]
 std::array<float, 2>
-GetArcInfo(std::array<float, 3>
-               p_circle); // returns arclength and direction (-1=CW,1=CCW)
+GetArcInfo(std::array<P2D, 3>
+               p_points); // returns arclength and direction (-1=CW,1=CCW)
 void FollowCircle(float p_direction, float p_length, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right

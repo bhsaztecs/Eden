@@ -45,9 +45,8 @@ void FollowPath(pathfunc p_path, float p_time, float p_start, float p_end,
     P2D middle = p_path(i + delta);
     P2D end = p_path(i + delta * 2);
 
-    std::array<float, 3> circle = PointsToCircle({start, middle, end});
+    std::array<float, 2> info = GetArcInfo({start, middle, end});
 
-    std::array<float, 2> info = GetArcInfo(circle);
     FollowCircle(info[1], info[0], delta * p_time, p_vals);
   }
 }

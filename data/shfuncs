@@ -21,9 +21,11 @@ indexe(){
 	sudo mkdir -p bin
 	sudo cp -r bin src include develop/
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
-		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -L./bin/ ./src/main.cpp -leden -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
+		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -L./bin ./src/main.cpp -leden -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
+	CODE=$?
 	sudo cp ./develop/bin/botball_user_program bin/
 	sudo rm -rf develop
+	return $CODE
 }
 executable() {
 	sudo mkdir -p develop
@@ -31,17 +33,22 @@ executable() {
 	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
 		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
+	CODE=$?
 	sudo cp ./develop/bin/botball_user_program bin/
 	sudo rm -rf develop
+	return $CODE
 }
 library() {
 	sudo mkdir -p develop
 	sudo mkdir -p bin
 	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
+	SRC=$(find ./src -name "*.cpp" ! -name "main.cpp" | tr '\n' ' ')
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
-		aarch64-linux-gnu-g++ -std=c++17 -g -fPIC -shared -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lpthread -lkipr -lz -o ./bin/libeden.so
+		aarch64-linux-gnu-g++ -std=c++17 -g -fPIC -shared -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib $SRC -lm -lpthread -lkipr -lz -o ./bin/libeden.so
+	CODE=$?
 	sudo cp ./develop/bin/libeden.so bin/
 	sudo rm -rf develop
+	return $CODE
 }
 copy() {
 	ping -c 1 192.168.125.1 > /dev/null || { echo "Host unreachable"; return 1; }
