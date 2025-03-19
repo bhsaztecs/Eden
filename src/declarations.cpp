@@ -84,6 +84,7 @@ float P2D::Angle() { return Deg(std::atan2(m_Y, m_X)); }
 bool P2D::operator==(const P2D &p_other) const {
   return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y);
 }
+bool P2D::operator!=(const P2D &p_other) const { return !(*this == p_other); }
 P2D P2D::operator+(const P2D &p_other) const {
   return P2D(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y);
 }
@@ -133,6 +134,7 @@ bool P3D::operator==(const P3D &p_other) const {
   return (this->m_X == p_other.m_X) && (this->m_Y == p_other.m_Y) &&
          (this->m_Z == p_other.m_Z);
 }
+bool P3D::operator!=(const P3D &p_other) const { return !(*this == p_other); }
 P3D P3D::operator+(const P3D &p_other) const {
   return P3D(this->m_X + p_other.m_X, this->m_Y + p_other.m_Y,
              this->m_Z + p_other.m_Z);
