@@ -48,6 +48,7 @@ sudo chmod 777 -R *
 <details>
 <summary>Windows</summary>
 <br>
+  
 ## Installation:
 ```sh
 git clone https://github.com/bhsaztecs/Eden
