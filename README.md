@@ -6,6 +6,12 @@ Eden is licensed under GNU AGPL.
 
 see data/example.cpp for example code
 
+## Prerequisites
+git - version control, how to actually download this stuff
+docker - compiles in a docker container
+ssh - shell into the robot, always nice.
+scp - copy files to and from the robot
+
 <details>
 <summary>Linux</summary>
 <br>
@@ -50,14 +56,14 @@ sudo chmod 777 -R *
 <br>
   
 ## Installation:
-```sh
+```powershell
 git clone https://github.com/bhsaztecs/Eden
 cd Eden
-. .\data\psfuncs.ps1
+. ./data/psfuncs.ps1
 Initialize
 ```
 ## Compiling
-```sh
+```powershell
 Compile [destination folder] [target]
 # destination folder should be UserName/ProjectName,
 # the full path name on the robot would be
@@ -77,6 +83,7 @@ and "/home/kipr/Documents/KISS/(i forgot the path sorry)"
 ### SCP refused to copy my files
 ```sh
 Remote-Shell
+# IN RASPBERRY PI
 cd /home/kipr/Documents/KISS/[UserName]/
 sudo chmod 777 -R *
 ```
