@@ -76,8 +76,7 @@ and "/home/kipr/Documents/KISS/(i forgot the path sorry)"
 
 ### SCP refused to copy my files
 ```sh
-
-shell
+Remote-Shell
 cd /home/kipr/Documents/KISS/[UserName]/
 sudo chmod 777 -R *
 ```
