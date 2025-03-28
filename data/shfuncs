@@ -48,6 +48,7 @@ library() {
 	CODE=$?
 	sudo cp ./develop/bin/libeden.so bin/
 	sudo rm -rf develop
+	echo "move bin/libeden.so to /usr/lib/libeden.so on the wombat"
 	return $CODE
 }
 copy() {
