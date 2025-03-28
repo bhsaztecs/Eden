@@ -6,8 +6,7 @@ Motors::~Motors() {
   off(m_Pass.rightmotor);
   m_Alive = false;
 }
-void Motors::NormalizeMultipliers(float p_leftmultiplier,
-                                  float p_rightmultiplier) {
+void Motors::NormalizeMultipliers() {
   DBUG;
   float maximizer = 1;
   if (m_Pass.lmm > m_Pass.rmm) {
@@ -31,7 +30,7 @@ Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
         }
       }) {
   DBUG;
-  NormalizeMultipliers(p_leftmultiplier, p_rightmultiplier);
+  NormalizeMultipliers();
   Clear();
 }
 void Motors::Clear() {
@@ -134,17 +133,17 @@ bool Sensors<BKND::sensors::type::Digital>::Value() {
   return BKND::sensors::digital::Value(m_Port);
 }
 
-PathFind::PathFind(BKND::pass &motorstoread) : m_Read(motorstoread) { DBUG; }
+PathFind::PathFind(BKND::pass &motorstoread) : m_Motors(motorstoread) { DBUG; }
 void PathFind::GoTo(BKND::P2D p_goal, float p_time) {
   DBUG;
-  BKND::path::GoTo(p_goal, p_time, m_Read);
+  BKND::path::GoTo(p_goal, p_time, m_Motors);
 }
 void PathFind::Face(float p_goal, float p_time) {
   DBUG;
-  BKND::path::Face(p_goal, p_time, m_Read);
+  BKND::path::Face(p_goal, p_time, m_Motors);
 }
 void PathFind::FollowPath(BKND::path::pathfunc p_path, float p_time,
                           float p_start, float p_end) {
   DBUG;
-  BKND::path::FollowPath(p_path, p_time, p_start, p_end, m_Read);
+  BKND::path::FollowPath(p_path, p_time, p_start, p_end, m_Motors);
 }

@@ -28,16 +28,15 @@ public:
 private:
   std::atomic<bool> m_Alive = {true};
   BKND::Thread m_VelThread;
-  void
-  NormalizeMultipliers(float p_leftmultiplier,
-                       float p_rightmultiplier); // maxes out motor multipliers
+  void NormalizeMultipliers(); // maxes out motor multipliers
   /* IN: left motor multiplier, right motor multiplier
    * EG: NormalizeMultipliers(0.1,0.2) sets lmm & rmm to 0.5 & 1 and tmm to 2.
    * maintains distances regardless of multipliers. */
 };
 class Servos {
-  static void MotorSet(int p_port,
-                       int ticks); // set, but only if using a motor as a servo
+  static void
+  MotorSet(int p_port,
+           int p_ticks); // set, but only if using a motor as a servo
   bool m_IsMotor;
 
 public:
@@ -62,20 +61,20 @@ public:
   int m_Port;
 
   Sensors(int p_port);
-  float Value(); // get value of sensor from 0-1
+  float Value(); // get value of sensor from 0..1
 };
 template <> class Sensors<BKND::sensors::type::Digital> {
 public:
   int m_Port;
 
   Sensors(int p_port);
-  bool Value(); // get value of sensor 0/1
+  bool Value(); // get value of sensor 0|1
 };
 
 class PathFind {
 public:
-  BKND::pass m_Read;
-  PathFind(BKND::pass &p_motorstoread);      // pass m_Pass from Motors
+  BKND::pass m_Motors;
+  PathFind(BKND::pass &p_motors);            // pass m_Pass from Motors
   void GoTo(BKND::P2D p_goal, float p_time); // go to point in p_time
   void Face(float p_goal,
             float p_time); // face angle (in degrees) in p_time
@@ -91,31 +90,31 @@ template <typename DATA> class Connection {
     DBUG;
     return BKND::IRoC::Deserialize<DATA>(p_serialdata);
   }
-  BKND::Thread m_RecieveThread;
+  BKND::Thread m_ReceiveThread;
   std::atomic<bool> m_Alive;
-  void Recieve() {
+  void Receive() {
     DBUG;
-    std::string data = BKND::IRoC::Recieve(m_Socket, sizeof(DATA));
-    if (m_Recieved.size() > 35) {
-      for (uint i = 1; i < m_Recieved.size(); i++) {
-        m_Recieved[i - 1] = m_Recieved[i];
+    std::string data = BKND::IRoC::Receive(m_Socket, sizeof(DATA));
+    if (m_Received.size() > 35) {
+      for (uint i = 1; i < m_Received.size(); i++) {
+        m_Received[i - 1] = m_Received[i];
       }
     }
     if (!data.empty()) {
-      m_Recieved.push_back(Deserialize(data));
+      m_Received.push_back(Deserialize(data));
     }
   }
 
 public:
-  std::vector<DATA> m_Recieved;
+  std::vector<DATA> m_Received;
   std::string m_TargetIP;
   int m_Socket;
   bool m_IsHost;
   Connection(std::string p_targetip, bool p_ishost)
-      : m_RecieveThread([this]() {
+      : m_ReceiveThread([this]() {
           while (m_Alive) {
             msleep(100);
-            Recieve();
+            Receive();
           }
         }) {
     DBUG;

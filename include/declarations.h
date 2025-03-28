@@ -105,7 +105,7 @@ struct pass {
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -218,7 +218,7 @@ GetArcInfo(std::array<P2D, 3>
 void FollowCircle(float p_direction, float p_length, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right
-};                              // namespace path
+}; // namespace path
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -229,7 +229,7 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-};                       // namespace analog
+}; // namespace analog
 namespace accel {
 void DetectCollision(pass p_read);
 P3D Raw();        // get raw accelerometer values
@@ -250,8 +250,8 @@ void Update();
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-};               // namespace battery
-};               // namespace sensors
+}; // namespace battery
+}; // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -261,7 +261,7 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-};                                 // namespace servos
+}; // namespace servos
 void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
@@ -334,7 +334,7 @@ template <typename DATA> DATA Deserialize(std::string p_serial) {
 }
 int Connect(bool p_ishost, std::string p_targetip);
 void Send(int p_socket, std::string p_message);
-inline std::string Recieve(int p_socket, size_t p_size) {
+inline std::string Receive(int p_socket, size_t p_size) {
   char buffer[p_size];
   memset(buffer, 0, sizeof(buffer));
   struct timeval timeout;
