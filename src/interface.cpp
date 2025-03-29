@@ -23,7 +23,8 @@ void Motors::NormalizeMultipliers() {
 Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
                float p_rightmultiplier, float p_wheelradius, float p_wheelbase)
     : m_Pass(p_leftport, p_rightport, p_leftmultiplier, p_rightmultiplier,
-             p_wheelradius, p_wheelbase, m_LeftSpeed, m_RightSpeed),
+             p_wheelradius, p_wheelbase, BKND::worldSpace(), nullptr,
+             m_LeftSpeed, m_RightSpeed),
       m_VelThread([this]() {
         while (m_Alive && BKND::G_ProgramRunning) {
           Velocity();

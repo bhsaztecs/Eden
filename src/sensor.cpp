@@ -12,11 +12,11 @@ int Raw(int p_port) { return ::analog(p_port); }
 } // namespace analog
 namespace accel {
 BKND::P3D Value;
-void DetectCollision() {
+void DetectCollision(pass p_vals) {
   float colisionthreshold = 0.1;
-  auto one = G_Odometry;
+  auto one = p_vals.position;
   msleep(100);
-  auto delta = G_Odometry - one;
+  auto delta = p_vals.position - one;
   if (delta.Magnitude() - Raw().Magnitude() > colisionthreshold) {
     G_Colided = true;
   }

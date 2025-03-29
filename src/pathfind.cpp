@@ -9,21 +9,21 @@ void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
   float theta = (p_deltar - p_deltal) / (2 * p_vals.wheelbase);
   float distance = (p_deltar + p_deltal) / 2;
   BKND::worldSpace temp = BKND::worldSpace(
-      distance * cos(theta + Rad(G_Odometry.m_Orientation)),
-      distance * sin(theta + Rad(G_Odometry.m_Orientation)), Deg(theta));
-  G_Odometry.m_X += temp.m_X;
-  G_Odometry.m_Y += temp.m_Y;
-  G_Odometry.m_Orientation += temp.m_Orientation;
+      distance * cos(theta + Rad(p_vals.position.m_Orientation)),
+      distance * sin(theta + Rad(p_vals.position.m_Orientation)), Deg(theta));
+  p_vals.position.m_X += temp.m_X;
+  p_vals.position.m_Y += temp.m_Y;
+  p_vals.position.m_Orientation += temp.m_Orientation;
 }
 void Face(float p_deg, float p_time, pass p_vals) {
   DBUG;
-  float wheelangle = (p_deg - BKND::G_Odometry.m_Orientation) *
+  float wheelangle = (p_deg - p_vals.position.m_Orientation) *
                      (p_vals.wheelbase / p_vals.wheelradius);
   BKND::motors::Rotation(-wheelangle, wheelangle, p_time, p_vals);
 }
 void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
   DBUG;
-  worldSpace delta = (worldSpace(p_goal.m_X, p_goal.m_Y) - BKND::G_Odometry);
+  worldSpace delta = (worldSpace(p_goal.m_X, p_goal.m_Y) - p_vals.position);
   float bias = 10;
   float ftime = (fabs(delta.Angle() / bias) /
                  (fabs(delta.Angle() / bias) + delta.Magnitude())) *

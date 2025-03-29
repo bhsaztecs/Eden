@@ -29,14 +29,14 @@ void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
   float time = (p_timeinseconds * 1000) * p_vals.tmm;
   int delay = 100; // 10hz = 100ms
   for (int t = 0; t < time; t += delay) {
-    auto p1 = G_Odometry;
+    auto p1 = p_vals.position;
     motor(p_vals.leftmotor, (p_leftpercent * p_vals.lmm));
     motor(p_vals.rightmotor, (p_rightpercent * p_vals.rmm));
     msleep(delay);
-    auto acceleration = (G_Odometry - p1) / delay;
+    auto acceleration = (p_vals.position - p1) / delay;
     if (acceleration.Magnitude() - sensors::accel::Raw().Magnitude() >
         G_ColisionLimit) {
-      HandleColision(p_vals);
+      p_vals.collisionhandler(p_vals);
     }
   }
 

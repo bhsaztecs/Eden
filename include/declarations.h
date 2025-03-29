@@ -93,19 +93,23 @@ struct pass {
   int rightmotor;
   float lmm; // left motor multiplier
   float rmm;
-  float tmm = 1;     // time multiplier, maintains distances
-  float wheelradius; // distance from center to edge of wheel
-  float wheelbase;   // distance from center of bot to wheel
-  float &leftspeed;  // dont set, just read
+  float tmm = 1;                  // time multiplier, maintains distances
+  float wheelradius;              // distance from center to edge of wheel
+  float wheelbase;                // distance from center of bot to wheel
+  worldSpace position;            // where is the center of the wheels?
+  void (*collisionhandler)(pass); // how to handle collisions?
+  float &leftspeed;               // dont set, just read
   float &rightspeed;
-  pass(int p_leftmotorport, int p_rightmotorport = 5,
+  pass(int p_leftmotorport, int p_rightmotorport = -1,
        float p_leftmultiplier = 1, float p_rightmultiplier = 1,
        float p_wheelradius = 1, float p_wheelbase = 1,
+       worldSpace p_position = worldSpace(), void (*p_collider)(pass) = nullptr,
        float &p_leftspeed = *new float, float &p_rightspeed = *new float)
       : leftmotor(p_leftmotorport), rightmotor(p_rightmotorport),
         lmm(p_leftmultiplier), rmm(p_rightmultiplier),
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
-        leftspeed(p_leftspeed), rightspeed(p_rightspeed) {};
+        position(p_position), collisionhandler(p_collider),
+        leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians
@@ -218,7 +222,7 @@ GetArcInfo(std::array<P2D, 3>
 void FollowCircle(float p_direction, float p_length, float p_time,
                   pass p_vals); // follow a radius for theta degrees. -to the
                                 // left, +to the right
-}; // namespace path
+};                              // namespace path
 
 namespace sensors {
 enum type { Analog, Digital };
@@ -229,7 +233,7 @@ bool Value(int p_port); // is port pressed?
 namespace analog {
 float Value(int p_port); // value from 0 to 1 of port
 int Raw(int p_port);     // value from 0 to 2047 of port
-}; // namespace analog
+};                       // namespace analog
 namespace accel {
 void DetectCollision(pass p_read);
 P3D Raw();        // get raw accelerometer values
@@ -250,8 +254,8 @@ void Update();
 namespace battery {
 int Power();     // get power from 0 to 100 NOT ACCURATE
 bool Critical(); // is power less than 33?
-}; // namespace battery
-}; // namespace sensors
+};               // namespace battery
+};               // namespace sensors
 
 namespace servos {
 void Set(int p_port, float p_angle,
@@ -261,7 +265,7 @@ void Change(int p_port, float p_angle,
             pointpair p_conversion); // current val + p_angle (can be negative)
 void Move(int p_port, float p_angle, float p_time,
           pointpair p_conversion); // slow set
-}; // namespace servos
+};                                 // namespace servos
 void HandleColision(pass p_vals);
 namespace motors {
 void ClearMotorRotations(pass p_vals); // set motor position counter to 0
@@ -361,22 +365,20 @@ inline std::string Receive(int p_socket, size_t p_size) {
 }
 } // namespace IRoC
 
-extern void (*G_CollisionHandler)(pass);
-extern long int G_CurrentMS;  // ms elapsed since timer called
-extern std::ofstream G_File;  // log file
-extern worldSpace G_Odometry; // odometer from wheels
+extern long int G_CurrentMS;    // ms elapsed since timer called
+extern std::ofstream G_LogFile; // log file
 extern std::vector<worldSpace *> Obstacles;
 extern IMU G_IMU;
-extern pointpair TTD;   // ticks to degrees unit conversion
-extern pointpair TTI;   // ticks to inches
-extern pointpair ITD;   // inches to degrees
-extern pointpair DTI;   // degrees to inches
-extern pointpair DTT;   // degrees to ticks
-extern pointpair ITT;   // inches to ticks
-extern pointpair TPSTP; // ticks per second to percentspeed
-extern pointpair PTTPS; // percentspeed to ticks per second
+const extern pointpair TTD;   // ticks to degrees unit conversion
+const extern pointpair TTI;   // ticks to inches
+const extern pointpair ITD;   // inches to degrees
+const extern pointpair DTI;   // degrees to inches
+const extern pointpair DTT;   // degrees to ticks
+const extern pointpair ITT;   // inches to ticks
+const extern pointpair TPSTP; // ticks per second to percentspeed
+const extern pointpair PTTPS; // percentspeed to ticks per second
 
 #define DBUG /* Debug info*/                                                   \
-  BKND::G_File << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__    \
-               << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
+  BKND::G_LogFile << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__ \
+                  << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND

@@ -1,24 +1,24 @@
 #include "../include/declarations.h"
 namespace BKND {
 Thread TIMER([]() { misc::Timer(); });
-pointpair TTD(P2D(0, 0), P2D(1900, 360));
-pointpair DTT(Inverse(TTD));
+const pointpair TTD(P2D(0, 0), P2D(1900, 360));
+const pointpair DTT(Inverse(TTD));
 
-pointpair ITD(P2D(0, 0), P2D(1, 41.379));
-pointpair DTI(Inverse(ITD));
+const pointpair ITD(P2D(0, 0), P2D(1, 41.379));
+const pointpair DTI(Inverse(ITD));
 
-pointpair TTI(P2D(0, 0), P2D(436.782, 2));
-pointpair ITT(Inverse(TTI));
+const pointpair TTI(P2D(0, 0), P2D(436.782, 2));
+const pointpair ITT(Inverse(TTI));
 
-pointpair PTTPS(P2D(0, 0), P2D(100, 1386));
-pointpair TPSTP(Inverse(PTTPS));
+const pointpair PTTPS(P2D(0, 0), P2D(100, 1386));
+const pointpair TPSTP(Inverse(PTTPS));
 
 std::atomic<bool> G_ProgramRunning = {true};
 float G_ColisionLimit = .1;
 std::atomic<bool> G_Colided = {false};
 void (*G_CollisionHandler)(pass) = nullptr;
 long int G_CurrentMS = 0;
-std::ofstream G_File("data/log.txt");
+std::ofstream G_LogFile("data/log.txt");
 std::vector<worldSpace *> G_Obstacles;
 worldSpace G_Odometry(0, 0, 0, 0);
 IMU G_IMU(0, 0, 0, 0, 0);

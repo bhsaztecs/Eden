@@ -23,7 +23,7 @@ public:
 void cleanup() {
   ao();
   G_ProgramRunning = false;
-  G_File.close();
+  G_LogFile.close();
 }
 void MyColisionHandler(pass p_vals) {
   motors::Brake(p_vals);
