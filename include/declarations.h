@@ -365,8 +365,7 @@ inline std::string Receive(int p_socket, size_t p_size) {
 }
 } // namespace IRoC
 
-extern long int G_CurrentMS;    // ms elapsed since timer called
-extern std::ofstream G_LogFile; // log file
+extern long int G_CurrentMS; // ms elapsed since timer called
 extern std::vector<worldSpace *> Obstacles;
 extern IMU G_IMU;
 const extern pointpair TTD;   // ticks to degrees unit conversion
@@ -377,8 +376,4 @@ const extern pointpair DTT;   // degrees to ticks
 const extern pointpair ITT;   // inches to ticks
 const extern pointpair TPSTP; // ticks per second to percentspeed
 const extern pointpair PTTPS; // percentspeed to ticks per second
-
-#define DBUG /* Debug info*/                                                   \
-  BKND::G_LogFile << __FILE__ << ":" << __LINE__ << " " << __PRETTY_FUNCTION__ \
-                  << " @ " << BKND::PrettyTime(BKND::G_CurrentMS) << std::endl
 } // namespace BKND

@@ -11,8 +11,9 @@ class ConData {
 public:
   ConData(std::string) {}
   ConData(const ConData &) = default;
-  ConData(worldSpace Position = G_Odometry, int ElapsedMS = G_CurrentMS,
-          bool Running = G_ProgramRunning, bool Colided = G_Colided)
+  ConData(worldSpace Position = tank.m_Pass.position,
+          int ElapsedMS = G_CurrentMS, bool Running = G_ProgramRunning,
+          bool Colided = G_Colided)
       : Position(Position), ElapsedMS(ElapsedMS), Running(Running),
         Colided(Colided) {}
   worldSpace Position;
@@ -23,7 +24,6 @@ public:
 void cleanup() {
   ao();
   G_ProgramRunning = false;
-  G_LogFile.close();
 }
 void MyColisionHandler(pass p_vals) {
   motors::Brake(p_vals);
@@ -31,7 +31,7 @@ void MyColisionHandler(pass p_vals) {
 }
 
 int main() {
-  G_CollisionHandler = MyColisionHandler;
+  tank.m_Pass.collisionhandler = MyColisionHandler;
   if (false /*tournament mode*/) {
     misc::WaitForLight(startlight.m_Port);
     shut_down_in(119);
@@ -44,12 +44,12 @@ int main() {
   Connection<ConData> connection("192.168.125.1", true);
   // connect to that ip as host
   connection.Connect();
-  ConData other = connection.m_Recieved.back(); // other = last recieved thing
+  ConData other = connection.m_Received.back(); // other = last recieved thing
   while (!other.Running) {                      // wait until other is running
     msleep(1000);
-    other = connection.m_Recieved.back();
+    other = connection.m_Received.back();
   }
-  auto path = path::MakePath({G_Odometry, P2D(10, 10), P2D(0, 10)});
+  auto path = path::MakePath({tank.m_Pass.position, P2D(10, 10), P2D(0, 10)});
   // make bezier curve with points (current, (10,10),(0,10))
   nav.FollowPath(path, 10); // follow that path for 10 seconds
 

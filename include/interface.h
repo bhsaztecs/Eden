@@ -83,17 +83,14 @@ public:
 };
 template <typename DATA> class Connection {
   std::string Serialize(DATA p_data) {
-    DBUG;
     return BKND::IRoC::Serialize<DATA>(p_data);
   }
   DATA Deserialize(std::string p_serialdata) {
-    DBUG;
     return BKND::IRoC::Deserialize<DATA>(p_serialdata);
   }
   BKND::Thread m_ReceiveThread;
   std::atomic<bool> m_Alive;
   void Receive() {
-    DBUG;
     std::string data = BKND::IRoC::Receive(m_Socket, sizeof(DATA));
     if (m_Received.size() > 35) {
       for (uint i = 1; i < m_Received.size(); i++) {
@@ -117,7 +114,6 @@ public:
             Receive();
           }
         }) {
-    DBUG;
     m_TargetIP = p_targetip;
     m_IsHost = p_ishost;
   }
@@ -125,12 +121,8 @@ public:
     m_Alive = false;
     msleep(200);
   }
-  int Connect() {
-    DBUG;
-    return BKND::IRoC::Connect(m_IsHost, m_TargetIP);
-  }
+  int Connect() { return BKND::IRoC::Connect(m_IsHost, m_TargetIP); }
   void Send(DATA p_data) {
-    DBUG;
     return BKND::IRoC::Send(m_Socket, Serialize(p_data));
   }
 };

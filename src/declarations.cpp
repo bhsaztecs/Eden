@@ -17,7 +17,6 @@ std::atomic<bool> G_ProgramRunning = {true};
 float G_ColisionLimit = .1;
 std::atomic<bool> G_Colided = {false};
 long int G_CurrentMS = 0;
-std::ofstream G_LogFile("data/log.txt");
 std::vector<worldSpace *> G_Obstacles;
 worldSpace G_Odometry(0, 0, 0, 0);
 IMU G_IMU(0, 0, 0, 0, 0);

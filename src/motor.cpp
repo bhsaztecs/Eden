@@ -4,12 +4,10 @@
 namespace BKND {
 namespace motors {
 void ClearMotorRotations(pass p_vals) {
-  DBUG;
   cmpc(p_vals.leftmotor);
   cmpc(p_vals.rightmotor);
 }
 void Velocity(pass p_vals) {
-  DBUG;
   float leftposition1 = gmpc(p_vals.leftmotor);
   float rightposition1 = gmpc(p_vals.rightmotor);
   msleep(100);
@@ -53,7 +51,6 @@ void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
 }
 void Distance(float p_leftinches, float p_rightinches, float p_timeinseconds,
               pass p_vals) {
-  DBUG;
   float leftticksps = BKND::UnitConvert(ITT, p_leftinches) / p_timeinseconds;
   float leftspeed = BKND::UnitConvert(TPSTP, leftticksps);
   float rightticksps = BKND::UnitConvert(ITT, p_rightinches) / p_timeinseconds;
@@ -62,14 +59,12 @@ void Distance(float p_leftinches, float p_rightinches, float p_timeinseconds,
 }
 void Rotation(float p_leftdegrees, float p_rightdegrees, float p_timeinseconds,
               pass p_vals) {
-  DBUG;
   float leftdistanec = BKND::UnitConvert(DTI, p_leftdegrees);
   float rightdistance = BKND::UnitConvert(DTI, p_rightdegrees);
   BKND::motors::Distance(leftdistanec, rightdistance, p_timeinseconds, p_vals);
 }
 void Accelerate(float p_leftmaxpercent, float p_rightmaxpercent,
                 float p_timeinseconds, pass p_vals) {
-  DBUG;
   float leftinitialspeed = p_vals.leftspeed;
   float leftdeltaspeed = p_leftmaxpercent - leftinitialspeed;
 
@@ -82,9 +77,6 @@ void Accelerate(float p_leftmaxpercent, float p_rightmaxpercent,
           p_timeinseconds / 100, p_vals);
   }
 }
-void Brake(pass p_vals) {
-  DBUG;
-  Speed(0, 0, 0.1, p_vals);
-}
+void Brake(pass p_vals) { Speed(0, 0, 0.1, p_vals); }
 } // namespace motors
 } // namespace BKND
