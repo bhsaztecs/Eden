@@ -16,20 +16,11 @@ const pointpair TPSTP(Inverse(PTTPS));
 std::atomic<bool> G_ProgramRunning = {true};
 float G_ColisionLimit = .1;
 std::atomic<bool> G_Colided = {false};
-void (*G_CollisionHandler)(pass) = nullptr;
 long int G_CurrentMS = 0;
 std::ofstream G_LogFile("data/log.txt");
 std::vector<worldSpace *> G_Obstacles;
 worldSpace G_Odometry(0, 0, 0, 0);
 IMU G_IMU(0, 0, 0, 0, 0);
-void HandleColision(pass p_vals) {
-  G_Colided = true;
-  if (G_CollisionHandler != nullptr) {
-    G_CollisionHandler(p_vals);
-  } else {
-    ao();
-  }
-}
 std::string PrettyTime(int p_ms) {
   int min;
   int sec;

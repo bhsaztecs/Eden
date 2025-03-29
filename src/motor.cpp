@@ -1,5 +1,6 @@
 #include "../include/declarations.h"
 #include <cmath>
+#include <cstdlib>
 namespace BKND {
 namespace motors {
 void ClearMotorRotations(pass p_vals) {
@@ -36,7 +37,13 @@ void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
     auto acceleration = (p_vals.position - p1) / delay;
     if (acceleration.Magnitude() - sensors::accel::Raw().Magnitude() >
         G_ColisionLimit) {
-      p_vals.collisionhandler(p_vals);
+      if (p_vals.collisionhandler != nullptr) {
+        p_vals.collisionhandler(p_vals);
+      } else {
+        std::cerr << "COLLISION DETECTED, EMERGENCY STOP" << std::endl;
+        ao();
+        exit(EXIT_FAILURE);
+      }
     }
   }
 
