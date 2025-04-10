@@ -1,6 +1,4 @@
 #include "../include/declarations.h"
-#include <cmath>
-#include <cstdlib>
 namespace BKND {
 namespace motors {
 void ClearMotorRotations(pass p_vals) {

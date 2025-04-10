@@ -1,5 +1,4 @@
 #include "../include/declarations.h"
-#include <kipr/accel/accel.h>
 
 namespace BKND {
 namespace sensors {

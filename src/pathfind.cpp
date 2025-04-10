@@ -1,7 +1,4 @@
 #include "../include/declarations.h"
-#include <initializer_list>
-#include <limits>
-#include <math.h>
 namespace BKND {
 namespace path {
 void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
