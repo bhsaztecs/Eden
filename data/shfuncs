@@ -17,9 +17,9 @@ initialize() {
 	echo "Run 'compile --nocopy executable' to validate."
 }
 indexe(){
-	sudo mkdir -p develop
-	sudo mkdir -p bin
-	sudo cp -r bin src include develop/
+	mkdir -p develop
+	mkdir -p bin
+	cp -r bin src include develop/
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
 		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -L./bin ./src/main.cpp -leden -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
 	CODE=$?
@@ -28,9 +28,9 @@ indexe(){
 	return $CODE
 }
 executable() {
-	sudo mkdir -p develop
-	sudo mkdir -p bin
-	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
+	mkdir -p develop
+	mkdir -p bin
+	cp -r bin src include data LICENSE.txt project.manifest README.md develop/
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
 		aarch64-linux-gnu-g++ -std=c++17 -g -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib ./src/*.cpp -lm -lpthread -lkipr -lz -o ./bin/botball_user_program
 	CODE=$?
@@ -39,9 +39,9 @@ executable() {
 	return $CODE
 }
 library() {
-	sudo mkdir -p develop
-	sudo mkdir -p bin
-	sudo cp -r bin src include data LICENSE.txt project.manifest README.md develop/
+	mkdir -p develop
+	mkdir -p bin
+	cp -r bin src include data LICENSE.txt project.manifest README.md develop/
 	SRC=$(find ./src -name "*.cpp" ! -name "main.cpp" | tr '\n' ' ')
 	sudo docker run -it --rm --volume ./develop:/home/kipr:rw sillyfreak/wombat-cross \
 		aarch64-linux-gnu-g++ -std=c++17 -g -fPIC -shared -Wall -I./include/* -I/usr/local/include/include/ -L/usr/local/lib $SRC -lm -lpthread -lkipr -lz -o ./bin/libeden.so
