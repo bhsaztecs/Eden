@@ -18,7 +18,6 @@ float G_ColisionLimit = .1;
 std::atomic<bool> G_Colided = {false};
 long int G_CurrentMS = 0;
 std::vector<worldSpace *> G_Obstacles;
-worldSpace G_Odometry(0, 0, 0, 0);
 IMU G_IMU(0, 0, 0, 0, 0);
 std::string PrettyTime(int p_ms) {
   int min;
