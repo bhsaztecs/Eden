@@ -5,7 +5,7 @@
 namespace BKND {
 namespace path {
 void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
-  DBUG;
+
   float theta = (p_deltar - p_deltal) / (2 * p_vals.wheelbase);
   float distance = (p_deltar + p_deltal) / 2;
   BKND::worldSpace temp = BKND::worldSpace(
@@ -16,13 +16,13 @@ void Pathfind(float p_deltal, float p_deltar, pass p_vals) {
   p_vals.position.m_Orientation += temp.m_Orientation;
 }
 void Face(float p_deg, float p_time, pass p_vals) {
-  DBUG;
+
   float wheelangle = (p_deg - p_vals.position.m_Orientation) *
                      (p_vals.wheelbase / p_vals.wheelradius);
   BKND::motors::Rotation(-wheelangle, wheelangle, p_time, p_vals);
 }
 void GoTo(BKND::P2D p_goal, float p_time, pass p_vals) {
-  DBUG;
+
   worldSpace delta = (worldSpace(p_goal.m_X, p_goal.m_Y) - p_vals.position);
   float bias = 10;
   float ftime = (fabs(delta.Angle() / bias) /
