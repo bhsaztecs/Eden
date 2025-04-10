@@ -14,11 +14,10 @@ void Velocity(pass p_vals) {
   float leftposition2 = gmpc(p_vals.leftmotor);
   float rightposition2 = gmpc(p_vals.rightmotor);
 
-  float leftvelocity = (leftposition2 - leftposition1) * 10; // tics per
-                                                             // second
+  float leftvelocity = (leftposition2 - leftposition1) * 10; // tics/second
   float rightvelocity = (rightposition2 - rightposition1) * 10;
-  p_vals.leftspeed = leftvelocity * 0.06; // percent speed
-  p_vals.rightspeed = rightvelocity * 0.06;
+  p_vals.leftspeed = BKND::UnitConvert(TPSTP, leftvelocity); // percent speed
+  p_vals.rightspeed = BKND::UnitConvert(TPSTP, rightvelocity);
 }
 void Speed(float p_leftpercent, float p_rightpercent, float p_timeinseconds,
            pass p_vals) {
