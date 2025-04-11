@@ -110,6 +110,30 @@ struct pass {
         wheelradius(p_wheelradius), wheelbase(p_wheelbase),
         position(p_position), collisionhandler(p_collider),
         leftspeed(p_leftspeed), rightspeed(p_rightspeed){};
+  // Copy constructor
+  pass(const pass &other)
+      : leftmotor(other.leftmotor), rightmotor(other.rightmotor),
+        lmm(other.lmm), rmm(other.rmm), tmm(other.tmm),
+        wheelradius(other.wheelradius), wheelbase(other.wheelbase),
+        position(other.position), collisionhandler(other.collisionhandler),
+        leftspeed(other.leftspeed), rightspeed(other.rightspeed) {}
+
+  // Copy assignment operator
+  pass &operator=(const pass &other) {
+    if (this != &other) {
+      leftmotor = other.leftmotor;
+      rightmotor = other.rightmotor;
+      lmm = other.lmm;
+      rmm = other.rmm;
+      tmm = other.tmm;
+      wheelradius = other.wheelradius;
+      wheelbase = other.wheelbase;
+      position = other.position;
+      collisionhandler = other.collisionhandler;
+      // Note: We don't reassign references leftspeed and rightspeed
+    }
+    return *this;
+  }
 };
 float Deg(float p_radians); // rad to deg
 /* IN: Radians

@@ -32,6 +32,26 @@ Motors::Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
   NormalizeMultipliers();
   Clear();
 }
+
+Motors &Motors::operator=(const Motors &other) {
+  if (this != &other) {
+    m_Pass = other.m_Pass;
+    m_LeftSpeed = other.m_LeftSpeed;
+    m_RightSpeed = other.m_RightSpeed;
+    m_Alive = other.m_Alive.load();
+  }
+  return *this;
+}
+
+Motors::Motors(const Motors &other)
+    : m_Pass(other.m_Pass), m_VelThread([this]() {
+        while (m_Alive && BKND::G_ProgramRunning) {
+          Velocity();
+        }
+      }),
+      m_LeftSpeed(other.m_LeftSpeed), m_RightSpeed(other.m_RightSpeed),
+      m_Alive(other.m_Alive.load()) {}
+
 void Motors::Clear() { BKND::motors::ClearMotorRotations(m_Pass); }
 void Motors::Velocity() { BKND::motors::Velocity(m_Pass); }
 void Motors::Speed(float p_leftgoalpercent, float p_rightgoalpercent,

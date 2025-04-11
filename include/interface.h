@@ -10,6 +10,9 @@ public:
   ~Motors();
   Motors(int p_leftport, int p_rightport, float p_leftmultiplier,
          float p_rightmultiplier, float p_wheelradius, float p_wheelbase);
+  Motors &operator=(const Motors &other);
+  Motors(const Motors &other);
+
   void Clear(); // clear motor position counter.
   void
   Speed(float p_leftgoalpercent, float p_rightgoalpercent,
