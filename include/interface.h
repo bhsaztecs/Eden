@@ -40,9 +40,9 @@ class Servos {
   static void
   MotorSet(int p_port,
            int p_ticks); // set, but only if using a motor as a servo
-  bool m_IsMotor;
 
 public:
+  bool m_IsMotor;
   int m_Port;
   BKND::pointpair m_Slope; // unit conversion
   Servos(int p_port, BKND::P2D p_min, BKND::P2D p_max, bool p_ismotor = false);
